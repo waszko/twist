@@ -45,45 +45,43 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    FORALL = 258,
-    EXISTS = 259,
-    IN = 260,
-    AND = 261,
-    OR = 262,
-    NOT = 263,
-    OPAREN = 264,
-    CPAREN = 265,
-    COMMA = 266,
-    EQUALS = 267,
-    NUMBER = 268,
-    NAME = 269
+    IN = 258,
+    AND = 259,
+    OR = 260,
+    NOT = 261,
+    OPAREN = 262,
+    CPAREN = 263,
+    COMMA = 264,
+    EQUALS = 265,
+    NUMBER = 266,
+    NAME = 267,
+    QUANTIFIER = 268
   };
 #endif
 /* Tokens.  */
-#define FORALL 258
-#define EXISTS 259
-#define IN 260
-#define AND 261
-#define OR 262
-#define NOT 263
-#define OPAREN 264
-#define CPAREN 265
-#define COMMA 266
-#define EQUALS 267
-#define NUMBER 268
-#define NAME 269
+#define IN 258
+#define AND 259
+#define OR 260
+#define NOT 261
+#define OPAREN 262
+#define CPAREN 263
+#define COMMA 264
+#define EQUALS 265
+#define NUMBER 266
+#define NAME 267
+#define QUANTIFIER 268
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 36 "fol.y" /* yacc.c:1909  */
+#line 44 "fol.y" /* yacc.c:1909  */
 
 	int num;
 	char *str;
 
-#line 87 "y.tab.h" /* yacc.c:1909  */
+#line 85 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

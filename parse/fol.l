@@ -4,8 +4,7 @@
 %}
 
 %%
-forall				return FORALL;
-exists				return EXISTS;
+forall|exists		yylval.str=strdup(yytext); return QUANTIFIER;
 in					return IN;
 &					return AND;
 \|					return OR;
