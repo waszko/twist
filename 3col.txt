@@ -1,0 +1,15 @@
+E R. E G. E B.(
+	A x in V (
+		( R(x) ^ -G(x) ^ -B(x) ) v
+		(-R(x) ^  G(x) ^ -B(x) ) v
+		(-R(x) ^ -G(x) ^  B(x) )
+	)
+	^
+	A x,y in V (
+		E(x,y) in L -> (
+			(R(x) ^ -R(y)) v
+			(G(x) ^ -G(y)) v
+			(B(x) ^ -B(y)) 
+		)
+	)	
+)
