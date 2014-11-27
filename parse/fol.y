@@ -39,63 +39,67 @@ int edges[3][2] = {
 
 %}
 
-%token IN AND OR NOT OPAREN CPAREN COMMA EQUALS
+%token IN AND OR NOT '(' ')' '=' ','
 
 %union
 {
 	int num;
+	char chr;
 	char *str;
 }
 
 %token <num> NUMBER
-%token <str> NAME
+%token <chr> LCHAR 
+%token <chr> UCHAR 
 %token <str> QUANTIFIER 
 
 %%
 
 sentence
 		: atomic_sentence
-		| sentence AND sentence
-		| sentence OR sentence
-		| NOT sentence
-		| OPAREN sentence CPAREN
-		| QUANTIFIER variables IN NAME sentence /* was "quant VAR sent" */
+		| sentence '&' sentence
+		| sentence '|' sentence
+		| '~' sentence
+		| '(' sentence ')'
+		| QUANTIFIER variables IN UCHAR sentence /* was "quant VAR sent" */
 		{
 			char connector;
 			if (!strcmp($1,"forall")) {
-				printf("FOR ALL\n");
 				connector = '&';
 			} else {
-				printf("EXISTS\n");
 				connector = '|';
 			}
 				printf("Connector to expand on is %c\n",connector);
-			// $$ = for i 0 to NAME length {
-			//		$5 with var replaced with NAME[i]) + connector
+			// $$ = for i 0 to UCHAR length {
+			//		$5 with var replaced with UCHAR[i]) + connector
 			// 		}
 		}
 		;
 
 variables								/* added by me */
-		:  NAME
-		| OPAREN variables CPAREN
-		| variables COMMA NAME
+		:  LCHAR 
+		| '(' variables ')'
+		| variables ',' LCHAR
 		;
 
 atomic_sentence
-		: NAME OPAREN term_list CPAREN /* this name is predicate */ 
-		| term EQUALS term
+		: UCHAR '(' term_list ')' /* this is a predicate */ 
+		| term '=' term
 		;
 
 term
-		: NAME OPAREN term_list CPAREN /* this name is function */
-		| NAME /* variable? */
-		| NUMBER /* constant? */
+			/* this is a function - do i even want functions? */
+		: LCHAR '(' term_list ')'
+			/* variable */
+		| LCHAR 				 
+			/* constant */
+		| NUMBER			 
 		;
 
 term_list
-		: term_list term /* comma ? */
-		| term
+			/* comma? */
+		: term_list term 
+		| term 
 		;
 
 %%

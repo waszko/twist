@@ -49,13 +49,10 @@ extern int yydebug;
     AND = 259,
     OR = 260,
     NOT = 261,
-    OPAREN = 262,
-    CPAREN = 263,
-    COMMA = 264,
-    EQUALS = 265,
-    NUMBER = 266,
-    NAME = 267,
-    QUANTIFIER = 268
+    NUMBER = 262,
+    LCHAR = 263,
+    UCHAR = 264,
+    QUANTIFIER = 265
   };
 #endif
 /* Tokens.  */
@@ -63,25 +60,23 @@ extern int yydebug;
 #define AND 259
 #define OR 260
 #define NOT 261
-#define OPAREN 262
-#define CPAREN 263
-#define COMMA 264
-#define EQUALS 265
-#define NUMBER 266
-#define NAME 267
-#define QUANTIFIER 268
+#define NUMBER 262
+#define LCHAR 263
+#define UCHAR 264
+#define QUANTIFIER 265
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 44 "fol.y" /* yacc.c:1909  */
+#line 45 "fol.y" /* yacc.c:1909  */
 
 	int num;
+	char chr;
 	char *str;
 
-#line 85 "y.tab.h" /* yacc.c:1909  */
+#line 80 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
