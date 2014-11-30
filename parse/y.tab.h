@@ -70,11 +70,11 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 45 "fol.y" /* yacc.c:1909  */
+#line 60 "fol.y" /* yacc.c:1909  */
 
-	int num;
+	int num; // not currently used as numbers are passed as strings
 	char chr;
-	char *str;
+	char *str; // not currently used as U/LCHARs passed as strings
 
 #line 80 "y.tab.h" /* yacc.c:1909  */
 };

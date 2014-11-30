@@ -4,14 +4,15 @@
 %}
 
 %%
-forall|exists		yylval.str=strdup(yytext); return QUANTIFIER;
+for[ ]?all|exists	yylval.str=strdup(yytext); return QUANTIFIER;
 in					return IN;
 	/* do we want tokens for logic symbols? */
 [&\|~]				return *yytext;
-[0-9]+				yylval.num=atoi(yytext); return NUMBER;
-[a-z]				yylval.chr=yytext[0]; return LCHAR;
-[A-Z]				yylval.chr=yytext[0]; return UCHAR;
- 	/* ^ is only chars ok? */
+[0-9]+				yylval.str=strdup(yytext); return NUMBER;
+	/* ^ currently passing numbers as strings */
+[a-z]				yylval.str=strdup(yytext); return LCHAR;
+[A-Z]				yylval.str=strdup(yytext); return UCHAR;
+ 	/* ^ is only chars ok? - and passing them as strings? */
 	/* do we want tokens for operators? */
 [=,\(\)]			return *yytext;
 \n					/* ignore EOL */;	
