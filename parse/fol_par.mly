@@ -6,7 +6,7 @@ open Expr (* contains expr type declarations *)
 %token QUANTIFIER IN 
 %token <string> LCHAR UCHAR /* ? char ? */
 %token AND OR NOT EQUALS
-%token LPAREN RPAREN
+%token LPAREN RPAREN SEMICOLON
 
 %left AND OR                /* ?? */ 
 %start main 
@@ -15,7 +15,7 @@ open Expr (* contains expr type declarations *)
 %%
 
 main:
-      sentence                               {$1}
+      sentence SEMICOLON                     {$1} /* semicolon? */
 ;
 
 sentence:

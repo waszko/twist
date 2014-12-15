@@ -10,6 +10,7 @@ type token =
   | EQUALS
   | LPAREN
   | RPAREN
+  | SEMICOLON
 
 val main :
   (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Expr.expr
