@@ -1,6 +1,7 @@
 type token =
   | INT of (int)
-  | QUANTIFIER
+  | FORALL
+  | EXISTS
   | IN
   | LCHAR of (string)
   | UCHAR of (string)

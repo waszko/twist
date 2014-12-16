@@ -20,7 +20,8 @@ let rec replace_expr a b e =
     | And (e1,e2) -> And (replace_expr a b e1, replace_expr a b e2)
     | Or  (e1,e2) ->  Or (replace_expr a b e1, replace_expr a b e2)
     | Not e1 ->  Not (replace_expr a b e1)
-    | Quant (s1,s2,e1) -> Quant (s1, s2, replace_expr a b e1)
+    | Forall (s1,s2,e1) -> Exists (s1, s2, replace_expr a b e1)
+    | Exists (s1,s2,e1) -> Exists (s1, s2, replace_expr a b e1)
     | Pred (s1,ts) -> Pred (s1, replace_terms a b ts)
     | Eq (t1,t2) -> Eq (replace_term a b t1, replace_term a b t2)
 
@@ -30,10 +31,19 @@ let rec expand_forall s l e =
     | hd :: tl -> And (replace_expr s hd e , expand_forall s tl e)
     (* what can i do about the warning wanting a "[]" case? *)
 
+let rec expand_exists s l e =
+    match l with 
+    | hd :: [] -> replace_expr s hd e
+    | hd :: tl -> Or (replace_expr s hd e , expand_exists s tl e)
+
 let expand_expr e = 
     match e with
-    | Quant (s1, s2, e1) -> if s2 = "V"  then expand_forall s1 vertices e1
-                       else if s2 = "A" then expand_forall s1 edges1 e1
-                       else if s2 = "B" then expand_forall s1 edges2 e1
-                       else e
+    | Forall (s1, s2, e1) -> if s2 = "V" then expand_forall s1 vertices e1
+                        else if s2 = "A" then expand_forall s1 edges1 e1
+                        else if s2 = "B" then expand_forall s1 edges2 e1
+                        else e
+    | Exists (s1, s2, e1) -> if s2 = "V" then expand_exists s1 vertices e1
+                        else if s2 = "A" then expand_exists s1 edges1 e1
+                        else if s2 = "B" then expand_exists s1 edges2 e1
+                        else e
     | _ -> e

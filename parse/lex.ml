@@ -233,12 +233,12 @@ let
 
   | 2 ->
 # 9 "lex.mll"
-                           ( QUANTIFIER )
+                           ( FORALL )
 # 238 "lex.ml"
 
   | 3 ->
 # 10 "lex.mll"
-                           ( QUANTIFIER )
+                           ( EXISTS )
 # 243 "lex.ml"
 
   | 4 ->

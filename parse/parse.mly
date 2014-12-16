@@ -3,7 +3,7 @@ open Expr (* contains expr type declarations *)
 %}
 
 %token <int> INT
-%token QUANTIFIER IN 
+%token FORALL EXISTS IN 
 %token <string> LCHAR UCHAR /* ? char ? */
 %token AND OR NOT EQUALS
 %token LPAREN RPAREN SEMICOLON
@@ -24,7 +24,8 @@ sentence:
     | sentence OR sentence                   {Or($1,$3)}
     | NOT sentence                           {Not($2)}
     | LPAREN sentence RPAREN                 {$2}
-    | QUANTIFIER LCHAR IN UCHAR sentence     {Quant($2,$4,$5)}
+    | FORALL LCHAR IN UCHAR sentence     {Forall($2,$4,$5)}
+    | EXISTS LCHAR IN UCHAR sentence     {Exists($2,$4,$5)}
 ;
 
 atomic_sentence:

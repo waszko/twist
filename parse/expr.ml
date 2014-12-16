@@ -10,7 +10,8 @@ type expr =
       And of expr * expr
     | Or of expr * expr
     | Not of expr
-    | Quant of string * string * expr
+    | Forall of string * string * expr
+    | Exists of string * string * expr
     | Pred of string * terms
     | Eq of term * term
 
@@ -32,8 +33,10 @@ let rec string_of_expr e =
         "(" ^ string_of_expr e1 ^ " | " ^ string_of_expr e2 ^ ")"
     | Not e1 -> 
         "(" ^ " ~ " ^ string_of_expr e1 ^ ")"
-    | Quant (s1,s2,e1) ->
+    | Forall (s1,s2,e1) ->
         "forall " ^ s1 ^ " in " ^ s2 ^ "(" ^ string_of_expr e1 ^ ")"
+    | Exists (s1,s2,e1) ->
+        "exists " ^ s1 ^ " in " ^ s2 ^ "(" ^ string_of_expr e1 ^ ")"
     | Pred (s1,ts) ->
         s1 ^ "(" ^ string_of_terms ts ^ ")"
     | Eq (t1,t2) ->
