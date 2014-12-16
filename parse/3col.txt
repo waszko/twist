@@ -1,0 +1,13 @@
+forall x in V (
+	  ( R(x) & ~G(x) & ~B(x))
+	| (~R(x) &  G(x) & ~B(x))
+	| (~R(x) & ~G(x) &  B(x))
+)
+&
+forall x in A (
+  forall y in B (
+	  (R(x) & ~R(y))
+	| (G(x) & ~G(y))
+	| (B(x) & ~B(y))
+  )
+)
