@@ -2,10 +2,10 @@ let _ =
     try
         let lexbuf = Lexing.from_channel stdin in
         while true do
-            let result = Fol_par.main Fol_lex.token lexbuf in
+            let result = Parse.main Lex.token lexbuf in
                 print_string (Expr.string_of_expr (
                         Expand.expand_expr result )); 
                 print_newline(); flush stdout
         done
-    with Fol_lex.Eof ->
+    with Lex.Eof ->
         exit 0

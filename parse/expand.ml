@@ -2,7 +2,8 @@ open Expr;;
 
 (* temp hard coded *)
 let vertices = ["1";"2";"3";"4"];; (* should these be ints? *)
-let edges = [("1","3");("1","4");("3","4")];;
+let edges1 = ["1";"1";"3"];;
+let edges2 = ["3";"4";"4"];;
 
 let replace_term a b t = 
     match t with
@@ -31,6 +32,8 @@ let rec expand_forall s l e =
 
 let expand_expr e = 
     match e with
-    | Quant (s1, s2, e1) -> if s2 = "V" then expand_forall s1 vertices e1
-                                        else e
+    | Quant (s1, s2, e1) -> if s2 = "V"  then expand_forall s1 vertices e1
+                       else if s2 = "A" then expand_forall s1 edges1 e1
+                       else if s2 = "B" then expand_forall s1 edges2 e1
+                       else e
     | _ -> e

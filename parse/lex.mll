@@ -1,5 +1,5 @@
 {
-    open Fol_par 
+    open Parse 
     exception Eof
 }
 

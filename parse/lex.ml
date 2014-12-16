@@ -1,9 +1,9 @@
-# 1 "fol_lex.mll"
+# 1 "lex.mll"
  
-    open Fol_par 
+    open Parse 
     exception Eof
 
-# 7 "fol_lex.ml"
+# 7 "lex.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base = 
    "\000\000\241\255\242\255\243\255\244\255\245\255\246\255\247\255\
@@ -217,94 +217,94 @@ let rec token lexbuf =
 and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 7 "fol_lex.mll"
+# 7 "lex.mll"
                            ( token lexbuf )
-# 223 "fol_lex.ml"
+# 223 "lex.ml"
 
   | 1 ->
 let
-# 8 "fol_lex.mll"
+# 8 "lex.mll"
                     lxm
-# 229 "fol_lex.ml"
+# 229 "lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 8 "fol_lex.mll"
+# 8 "lex.mll"
                            ( INT (int_of_string lxm) )
-# 233 "fol_lex.ml"
+# 233 "lex.ml"
 
   | 2 ->
-# 9 "fol_lex.mll"
+# 9 "lex.mll"
                            ( QUANTIFIER )
-# 238 "fol_lex.ml"
+# 238 "lex.ml"
 
   | 3 ->
-# 10 "fol_lex.mll"
+# 10 "lex.mll"
                            ( QUANTIFIER )
-# 243 "fol_lex.ml"
+# 243 "lex.ml"
 
   | 4 ->
-# 11 "fol_lex.mll"
+# 11 "lex.mll"
                            ( IN )
-# 248 "fol_lex.ml"
+# 248 "lex.ml"
 
   | 5 ->
 let
-# 12 "fol_lex.mll"
+# 12 "lex.mll"
                     id
-# 254 "fol_lex.ml"
+# 254 "lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 12 "fol_lex.mll"
+# 12 "lex.mll"
                            ( LCHAR id )
-# 258 "fol_lex.ml"
+# 258 "lex.ml"
 
   | 6 ->
 let
-# 13 "fol_lex.mll"
+# 13 "lex.mll"
                     id
-# 264 "fol_lex.ml"
+# 264 "lex.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 13 "fol_lex.mll"
+# 13 "lex.mll"
                            ( UCHAR id )
-# 268 "fol_lex.ml"
+# 268 "lex.ml"
 
   | 7 ->
-# 14 "fol_lex.mll"
+# 14 "lex.mll"
                            ( AND )
-# 273 "fol_lex.ml"
+# 273 "lex.ml"
 
   | 8 ->
-# 15 "fol_lex.mll"
+# 15 "lex.mll"
                            ( OR )
-# 278 "fol_lex.ml"
+# 278 "lex.ml"
 
   | 9 ->
-# 16 "fol_lex.mll"
+# 16 "lex.mll"
                            ( NOT )
-# 283 "fol_lex.ml"
+# 283 "lex.ml"
 
   | 10 ->
-# 17 "fol_lex.mll"
+# 17 "lex.mll"
                            ( EQUALS )
-# 288 "fol_lex.ml"
+# 288 "lex.ml"
 
   | 11 ->
-# 18 "fol_lex.mll"
+# 18 "lex.mll"
                            ( LPAREN )
-# 293 "fol_lex.ml"
+# 293 "lex.ml"
 
   | 12 ->
-# 19 "fol_lex.mll"
+# 19 "lex.mll"
                            ( RPAREN )
-# 298 "fol_lex.ml"
+# 298 "lex.ml"
 
   | 13 ->
-# 20 "fol_lex.mll"
+# 20 "lex.mll"
                            ( SEMICOLON )
-# 303 "fol_lex.ml"
+# 303 "lex.ml"
 
   | 14 ->
-# 21 "fol_lex.mll"
+# 21 "lex.mll"
                            ( raise Eof )
-# 308 "fol_lex.ml"
+# 308 "lex.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; __ocaml_lex_token_rec lexbuf __ocaml_lex_state
 
