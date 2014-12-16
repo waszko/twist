@@ -20,7 +20,7 @@ let rec replace_expr a b e =
     | And (e1,e2) -> And (replace_expr a b e1, replace_expr a b e2)
     | Or  (e1,e2) ->  Or (replace_expr a b e1, replace_expr a b e2)
     | Not e1 ->  Not (replace_expr a b e1)
-    | Forall (s1,s2,e1) -> Exists (s1, s2, replace_expr a b e1)
+    | Forall (s1,s2,e1) -> Forall (s1, s2, replace_expr a b e1)
     | Exists (s1,s2,e1) -> Exists (s1, s2, replace_expr a b e1)
     | Pred (s1,ts) -> Pred (s1, replace_terms a b ts)
     | Eq (t1,t2) -> Eq (replace_term a b t1, replace_term a b t2)
