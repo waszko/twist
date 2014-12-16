@@ -36,14 +36,19 @@ let rec expand_exists s l e =
     | hd :: [] -> replace_expr s hd e
     | hd :: tl -> Or (replace_expr s hd e , expand_exists s tl e)
 
-let expand_expr e = 
+let rec expand_expr e = 
     match e with
-    | Forall (s1, s2, e1) -> if s2 = "V" then expand_forall s1 vertices e1
-                        else if s2 = "A" then expand_forall s1 edges1 e1
-                        else if s2 = "B" then expand_forall s1 edges2 e1
-                        else e
-    | Exists (s1, s2, e1) -> if s2 = "V" then expand_exists s1 vertices e1
-                        else if s2 = "A" then expand_exists s1 edges1 e1
-                        else if s2 = "B" then expand_exists s1 edges2 e1
-                        else e
-    | _ -> e
+    | And (e1,e2) -> And (expand_expr e1, expand_expr e2)
+    | Or  (e1,e2) ->  Or (expand_expr e1, expand_expr e2)
+    | Not e1 -> Not (expand_expr e1)
+    | Forall (s1, s2, e1) -> 
+        if s2 = "V" then expand_forall s1 vertices (expand_expr e1)
+        else if s2 = "A" then expand_forall s1 edges1 (expand_expr e1)
+        else if s2 = "B" then expand_forall s1 edges2 (expand_expr e1)
+        else expand_expr e
+    | Exists (s1, s2, e1) -> 
+        if s2 = "V" then expand_exists s1 vertices (expand_expr e1)
+        else if s2 = "A" then expand_exists s1 edges1 (expand_expr e1)
+        else if s2 = "B" then expand_exists s1 edges2 (expand_expr e1)
+        else expand_expr e
+    | _ -> e (* is it clearer to give last 2 cases explicitly? *) 
