@@ -1,9 +1,12 @@
 open Expr;;
 
 (* temp hard coded *)
-let vertices = ["1";"2";"3";"4"];; (* should these be ints? *)
+(*let vertices = ["1";"2";"3";"4"];; (* should these be ints? *)
 let edges1 = ["1";"1";"3"];;
-let edges2 = ["3";"4";"4"];;
+let edges2 = ["3";"4";"4"];;*)
+let vertices = ["1";"2";"3"];;
+let edges1 = ["1";"2"];;
+let edges2 = ["2";"3"];;
 
 let replace_term a b t = 
     match t with
