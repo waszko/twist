@@ -24,13 +24,13 @@ sentence:
     | sentence OR sentence                   {Or($1,$3)}
     | NOT sentence                           {Not($2)}
     | LPAREN sentence RPAREN                 {$2}
-    | FORALL LCHAR IN UCHAR sentence     {Forall($2,$4,$5)}
-    | EXISTS LCHAR IN UCHAR sentence     {Exists($2,$4,$5)}
+    | FORALL term_list IN UCHAR sentence {Forall(Terms(List.rev $2),$4,$5)}
+    | EXISTS term_list IN UCHAR sentence {Exists(Terms(List.rev $2),$4,$5)}
 ;
 
 atomic_sentence:
       /* predicate */
-      UCHAR LPAREN term_list RPAREN          {Pred($1,$3)} 
+      UCHAR LPAREN term_list RPAREN          {Pred($1,Terms(List.rev $3))} 
     | term EQUALS term                       {Eq($1,$3)}
 ;
 
@@ -43,6 +43,6 @@ term:
 ;
 
 term_list:
-      term_list term                         {Terms($1,$2)} /* bad */
-    | term                                   {Term($1)}
+      term_list term                         {$2::$1} /* list */
+    | term                                   {[$1]}
 ;

@@ -7,8 +7,8 @@ let dimacs_of_term t =
 
 let rec dimacs_of_terms ts =
     match ts with
-    | Term t -> dimacs_of_term t
-    | Terms (ts,t) -> dimacs_of_terms ts ^ " " ^ dimacs_of_term t
+    | Terms [] -> "" (* have single elem case to remove trailing spaces? *)
+    | Terms (t::ts) -> dimacs_of_term t ^ " " ^ dimacs_of_terms (Terms ts)
 
 let rec dimacs_of_expr e =
     match e with
