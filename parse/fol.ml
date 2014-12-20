@@ -6,7 +6,7 @@ let _ =
                 let expanded = Expand.expand_expr result in
                   print_string ( Expr.string_of_expr expanded );
                   print_newline(); print_newline();
-                  let cnf = Cnf.cnf_expr expanded in
+                  let cnf = Cnf.cnf_expr (Sub.sub_expr_call expanded) in
                    (* print_string ( Expr.string_of_expr cnf );
                     print_newline(); print_newline(); *)
                     print_string ( Dimacs.dimacs_of_expr cnf );
