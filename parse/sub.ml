@@ -54,7 +54,7 @@ let rec sub_expr2 e map n =
             let n1 = n + 1 in
             let map1 = String_map.add e_str n1 map in
             let p = Pred ("", Terms [Const n1]) in
-            print_string(e_str ^ " = " ^ string_of_int n1 ^ "\n");
+            print_string(e_str ^ "=" ^ string_of_int n1 ^ " ");
             (p,map1,n1)  
     | _ -> (e,map,n) (* error *)
 

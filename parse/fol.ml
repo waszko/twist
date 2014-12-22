@@ -11,6 +11,26 @@ let call_minisat () =
     print_newline();
     flush stdout
 
+(* read out.txt to find satisfying assignment (or not) *)
+let output_answer () =
+    let ic = open_in "out.txt" in
+    try 
+        let line = input_line ic in
+        if line = "SAT" then (
+            let line2 = input_line ic in
+         (* let vars = Str.split (Str.regexp " ") line in *)
+         (* map back to predicates?? *)
+            print_string ("Satisfying assignment: " ^ line2 ^ "\n") )
+        else if line = "UNSAT" then (
+            print_string "No satisfying assignment exists\n"; )
+        else
+            print_string "FILE FORMAT ERROR\n"; (* throw error? *)
+        flush stdout;    
+        close_in ic       
+    with e ->              
+        close_in_noerr ic;  
+        raise e              
+
 let _ =
     try
         let lexbuf = Lexing.from_channel stdin in
@@ -26,6 +46,7 @@ let _ =
             write_cnf dimacs;
             
             call_minisat ();
+            output_answer ();
         done
     with Lex.Eof ->
         exit 0
