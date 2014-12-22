@@ -1,16 +1,5 @@
 open Expr;;
 
-(* temp hard coded *)
-let vertices = [["1"];["2"];["3"];["4"]];; (* this a list of lists? *)
-let edges = [["1";"3"];["1";"4"];["3";"4"]];; (* & should these be ints? *)
-
-(* Petersen graph: *)
-(*let vertices = [["1"];["2"];["3"];["4"];["5"];
-                ["6"];["7"];["8"];["9"];["10"]];; 
-let edges = [["1";"2"];["2";"3"];["3";"4"];["4";"5"];["5";"1"];
-             ["1";"6"];["2";"7"];["3";"8"];["4";"9"];["5";"10"];
-             ["6";"8"];["6";"9"];["7";"9"];["7";"10"];["8";"10"]];;*)
-
 let replace_term a b t = 
     match t with
     | Const c -> Const c
@@ -49,19 +38,19 @@ let rec expand_exists ts l e =
     | hd :: [] -> match_expr ts hd e
     | hd :: tl -> Or (match_expr ts hd e , expand_exists ts tl e)
 
-let rec expand_expr e = 
+(* do i need to keep repeating this everywhere? *)
+module String_map = Map.Make (String);;
+
+let rec expand_expr e sets_map = 
     match e with
-    | And (e1,e2) -> And (expand_expr e1, expand_expr e2)
-    | Or  (e1,e2) ->  Or (expand_expr e1, expand_expr e2)
-    | Not e1 -> Not (expand_expr e1)
+    | And (e1,e2) -> And (expand_expr e1 sets_map, expand_expr e2 sets_map)
+    | Or  (e1,e2) ->  Or (expand_expr e1 sets_map, expand_expr e2 sets_map)
+    | Not e1 -> Not (expand_expr e1 sets_map)
     | Forall (Terms ts, s2, e1) -> 
-        if s2 = "V" then expand_forall ts vertices (expand_expr e1)
-        else if s2 = "E" then expand_forall ts edges (expand_expr e1)
-     (* else if s2 = "B" then expand_forall s1 edges2 (expand_expr e1) *)
-        else expand_expr e
+        let set = String_map.find s2 sets_map in 
+        expand_forall ts set (expand_expr e1 sets_map)
+        (* error if s2 not in map? *)
     | Exists (Terms ts, s2, e1) -> 
-        if s2 = "V" then expand_exists ts vertices (expand_expr e1)
-        else if s2 = "E" then expand_exists ts edges (expand_expr e1)
-     (* else if s2 = "B" then expand_exists s1 edges2 (expand_expr e1) *)
-        else expand_expr e
+        let set = String_map.find s2 sets_map in 
+        expand_exists ts set (expand_expr e1 sets_map)
     | _ -> e (* is it clearer to give last 2 cases explicitly? *) 

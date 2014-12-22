@@ -35,8 +35,9 @@ let _ =
     try
         let lexbuf = Lexing.from_channel stdin in
         while true do
+            let instance = Io.read_instance () in
             let result = Parse.main Lex.token lexbuf in
-            let expanded = Expand.expand_expr result in
+            let expanded = Expand.expand_expr result instance in
             print_string ( Expr.string_of_expr expanded );
             print_newline(); print_newline();
             let (subbed, nbvars) = Sub.sub_expr_call expanded in
