@@ -31,35 +31,28 @@ module Pred_map = Map.Make (struct
 
 module String_map = Map.Make(String);;
 
-let rec sub_expr2 e map n = 
+(* is using refs ok? Or better to put back as args (more complex code) *)
+let n = ref 0 (* highest substitution so far *)
+let map = ref String_map.empty (* map from pred to substitution (int) *)
+                               (* CANT GET THIS TO WORK WITH PRED MAP :( *)
+
+let rec sub_expr e = 
     match e with
-    | And (e1, e2) ->
-        let (e1, map1, n1) = sub_expr2 e1 map n in
-        let (e2, map2, n2) = sub_expr2 e2 map1 n1 in
-        (And(e1,e2), map2, n2)
-    | Or (e1, e2) ->
-        let (e1, map1, n1) = sub_expr2 e1 map n in
-        let (e2, map2, n2) = sub_expr2 e2 map1 n1 in
-        (Or(e1,e2), map2, n2)
-    | Not e1 ->
-        let (e1, map1, n1) = sub_expr2 e1 map n in
-        (Not e1, map1, n1)
+    | And (e1, e2) -> And (sub_expr e1, sub_expr e2)
+    | Or (e1, e2) -> Or (sub_expr e1, sub_expr e2)
+    | Not e1 -> Not (sub_expr e1)
     | Pred (s, ts) -> (* dont care about pred contents.. *)
         let e_str = string_of_expr e in
-        if String_map.mem e_str map then 
-            let sub = String_map.find e_str map in
-            let p = Pred ("", Terms [Const sub]) in
-            (p,map,n) 
-        else 
-            let n1 = n + 1 in
-            let map1 = String_map.add e_str n1 map in
-            let p = Pred ("", Terms [Const n1]) in
-            print_string(e_str ^ "=" ^ string_of_int n1 ^ " ");
-            (p,map1,n1)  
-    | _ -> (e,map,n) (* error *)
+        if String_map.mem e_str !map then 
+            let sub = String_map.find e_str !map in
+            Pred ("", Terms [Const sub])
+        else ( 
+            n := !n +1;
+            map := String_map.add e_str !n !map;
+            print_string(e_str ^ "=" ^ string_of_int !n ^ " ");
+            Pred ("", Terms [Const !n]) )
+    | _ -> e (* error *)
 
 let sub_expr_call e =
-    let map = String_map.empty in (* CANT GET THIS TO WORK WITH PRED MAP *)
-    let n = 0 in (* highest substition so far *)
-    let (exp, map, n) = sub_expr2 e map n in (* is this bad? *)
-    (exp, n)
+    let exp = sub_expr e in (* is this bad? *)
+    (exp, !n)
