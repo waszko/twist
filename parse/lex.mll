@@ -18,5 +18,5 @@ rule token = parse
     | '('                  { LPAREN }
     | ')'                  { RPAREN }
     | ';'                  { SEMICOLON }
-    | eof                  { raise Eof }
+    | eof                  { EOF } (* was raise Eof *)
 

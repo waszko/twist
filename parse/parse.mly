@@ -6,7 +6,7 @@ open Expr (* contains expr type declarations *)
 %token FORALL EXISTS IN 
 %token <string> LCHAR UCHAR /* ? char ? */
 %token AND OR NOT EQUALS
-%token LPAREN RPAREN SEMICOLON
+%token LPAREN RPAREN SEMICOLON EOF
 
 %left AND OR                /* ?? */ 
 %start main 
@@ -15,7 +15,7 @@ open Expr (* contains expr type declarations *)
 %%
 
 main:
-      sentence SEMICOLON                     {$1} /* semicolon? */
+      sentence EOF                           {$1} /* semicolon? */
 ;
 
 sentence:

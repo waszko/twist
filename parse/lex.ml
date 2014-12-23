@@ -303,7 +303,7 @@ let
 
   | 14 ->
 # 21 "lex.mll"
-                           ( raise Eof )
+                           ( EOF )
 # 308 "lex.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; __ocaml_lex_token_rec lexbuf __ocaml_lex_state
