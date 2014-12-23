@@ -30,11 +30,13 @@ module Pred_map = Map.Make (struct
 (* NOTHING ABOVE HERE ACT USED AS I CANT GET PRED_MAP TO WORK CORRECTLY *)
 
 module String_map = Map.Make(String);;
+module Int_map = Map.Make(struct type t = int let compare = compare end)
 
 (* is using refs ok? Or better to put back as args (more complex code) *)
 let n = ref 0 (* highest substitution so far *)
 let map = ref String_map.empty (* map from pred to substitution (int) *)
                                (* CANT GET THIS TO WORK WITH PRED MAP :( *)
+let rev_map = ref Int_map.empty (* maps subs to preds to decode answer *)
 
 let rec sub_expr e = 
     match e with
@@ -49,10 +51,11 @@ let rec sub_expr e =
         else ( 
             n := !n +1;
             map := String_map.add e_str !n !map;
+            rev_map := Int_map.add !n e_str !rev_map;
             print_string(e_str ^ "=" ^ string_of_int !n ^ " ");
             Pred ("", Terms [Const !n]) )
     | _ -> e (* error *)
 
 let sub_expr_call e =
     let exp = sub_expr e in (* is this bad? *)
-    (exp, !n)
+    (exp, !n, !rev_map)
