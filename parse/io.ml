@@ -1,8 +1,8 @@
 module String_map = Map.Make (String);;
 
 (* reads instance sets into map from name to string list list *)
-let read_instance () =
-    let ic = open_in "instance.txt" in
+let read_instance file_name =
+    let ic = open_in file_name in
     let sets_map = ref String_map.empty in (* map from set name to set *)
     try
         while true do
@@ -18,15 +18,15 @@ let read_instance () =
         close_in ic;
         !sets_map 
 
-(* write dimacs_cnf string to "out.cnf" file *)
-let write_cnf str =
-    let oc = open_out "out.cnf" in
+(* write dimacs_cnf string to file *)
+let write_cnf str file_name =
+    let oc = open_out file_name in
     Printf.fprintf oc "%s" str;
     close_out oc
 
-(* read out.txt to find satisfying assignment (or not) *)
-let output_answer () =
-    let ic = open_in "out.txt" in
+(* read output of sat-solver to find satisfying assignment (or not) *)
+let output_answer file_name =
+    let ic = open_in file_name in
     try 
         let line = input_line ic in
         if line = "SAT" then (
