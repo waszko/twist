@@ -13,14 +13,13 @@ let main instance_file problem_file cnf_file answer_file =
     let result = Parse.main Lex.token lexbuf in
     close_in problem;
     let expanded = Expand.expand_expr result instance in
-    print_string ( Expr.string_of_expr expanded );
-    print_newline(); print_newline();
+    print_string ( Expr.string_of_expr expanded ^ "\n\n" );
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded in
     let cnf = Cnf.cnf_expr subbed in
-    print_newline(); flush stdout;
+    print_newline();
+    flush stdout;
     let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
     Io.write_cnf dimacs cnf_file;
-    
     call_minisat cnf_file answer_file;
     Io.output_answer pred_map answer_file
 

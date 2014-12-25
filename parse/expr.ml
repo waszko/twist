@@ -4,7 +4,6 @@ type term =
 
 type terms = 
       Terms of term list
- (* | Terms of terms * term *)
 
 type expr =
       And of expr * expr
@@ -23,23 +22,24 @@ let string_of_term t =
 let rec string_of_terms ts =
     match ts with
     | Terms [] -> ""
-    | Terms (hd::tl) -> string_of_term hd ^ " " ^ string_of_terms (Terms tl)
+    | Terms (hd :: tl) -> 
+        string_of_term hd ^ " " ^ string_of_terms (Terms tl)
 
 let rec string_of_expr e =
     match e with
-    | And (e1,e2) ->
+    | And (e1, e2) ->
         "(" ^ string_of_expr e1 ^ " & " ^ string_of_expr e2 ^ ")"
-    | Or  (e1,e2) ->
+    | Or  (e1, e2) ->
         "(" ^ string_of_expr e1 ^ " | " ^ string_of_expr e2 ^ ")"
     | Not e1 -> 
         "(" ^ " ~ " ^ string_of_expr e1 ^ ")"
-    | Forall (ts,s1,e1) ->
+    | Forall (ts, s1, e1) ->
         "forall " ^ string_of_terms ts ^ " in " 
         ^ s1 ^ "(" ^ string_of_expr e1 ^ ")"
-    | Exists (ts,s1,e1) ->
+    | Exists (ts, s1, e1) ->
         "exists " ^ string_of_terms ts ^ " in " 
         ^ s1 ^ "(" ^ string_of_expr e1 ^ ")"
-    | Pred (s1,ts) ->
+    | Pred (s1, ts) ->
         s1 ^ "(" ^ string_of_terms ts ^ ")"
-    | Eq (t1,t2) ->
+    | Eq (t1, t2) ->
         string_of_term t1 ^ " = " ^ string_of_term t2

@@ -1,6 +1,6 @@
 {
     open Parse 
-    exception Eof
+    exception Eof (* ? *)
 }
 
 rule token = parse

@@ -29,15 +29,12 @@ sentence:
 ;
 
 atomic_sentence:
-      /* predicate */
       UCHAR LPAREN term_list RPAREN          {Pred($1,Terms(List.rev $3))} 
     | term EQUALS term                       {Eq($1,$3)}
 ;
 
 term:                    
-      /* variable */
       LCHAR                                  {Var $1} /* parens? */  
-      /* constant *?
     | INT                                    {Const $1}
       /* also functions? */
 ;

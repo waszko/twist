@@ -1,7 +1,7 @@
 # 1 "lex.mll"
  
     open Parse 
-    exception Eof
+    exception Eof (* ? *)
 
 # 7 "lex.ml"
 let __ocaml_lex_tables = {
