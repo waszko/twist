@@ -27,9 +27,9 @@ let main instance_file problem_file cnf_file answer_file =
 let _ = 
     let num_args = Array.length Sys.argv in
     let instance_file = if num_args >= 2 then Sys.argv.(1)
-                                         else "instance.txt" in
+                                         else "graphs/basic.txt" in
     let problem_file  = if num_args >= 3 then Sys.argv.(2)
-                                         else "3col.txt"     in
+                                         else "problems/3col.txt"  in
     let cnf_file      = if num_args >= 4 then Sys.argv.(3)
                                          else "out.cnf"      in
     let answer_file   = if num_args >= 5 then Sys.argv.(4)
