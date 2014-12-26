@@ -1,3 +1,10 @@
+let time_section section_label prev_time = 
+    let current_time = Sys.time() in
+    Printf.printf "Time taken: %fs\n\n" (current_time -. prev_time);
+    Printf.printf section_label;
+    flush stdout; (* ? *)
+    current_time
+
 (* call minisat on "out.cnf", storing result in "out.txt" *)
 let call_minisat cnf_file answer_file =
     let cmd = "../sat_solvers/minisat/minisat " 
@@ -7,21 +14,31 @@ let call_minisat cnf_file answer_file =
     flush stdout
 
 let main instance_file problem_file cnf_file answer_file =
+    let t = Sys.time() in
+    Printf.printf "Parsing problem...\n";
     let problem = open_in problem_file in
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
-    let instance = Io.read_instance instance_file in
-    let result = Parse.main Lex.token lexbuf in
+    let parsed_problem = Parse.main Lex.token lexbuf in
     close_in problem;
-    let expanded = Expand.expand_expr result instance in
-    print_string ( Expr.string_of_expr expanded ^ "\n\n" );
+    let t = time_section "Parsing instance...\n" t in
+    let instance = Io.read_instance instance_file in
+    let t = time_section "Expanding problem...\n" t in
+    let expanded = Expand.expand_expr parsed_problem instance in
+ (* print_string ( Expr.string_of_expr expanded ^ "\n\n" ); *)
+    let t = time_section "Substituting predicates...\n" t in
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded in
+    let t = time_section "Converting to CNF...\n" t in
     let cnf = Cnf.cnf_expr subbed in
-    print_newline();
-    flush stdout;
+    flush stdout; (* ? *)
+    let t = time_section "Converting to DIMACS-CNF...\n" t in
     let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
     Io.write_cnf dimacs cnf_file;
+    let t = time_section "Running SAT-solver...\n" t in
     call_minisat cnf_file answer_file;
-    Io.output_answer pred_map answer_file
+    let t = time_section "Replacing predicates...\n" t in
+    Io.output_answer pred_map answer_file;
+    Printf.printf "Total running time: %fs\n\n" t;
+    flush stdout
 
 (* get file names, or defaults if not given *)
 let _ = 

@@ -52,7 +52,7 @@ let rec sub_expr e =
             n := !n +1;
             map := String_map.add e_str !n !map;
             rev_map := Int_map.add !n e_str !rev_map;
-            print_string(e_str ^ "=" ^ string_of_int !n ^ " ");
+         (* print_string(e_str ^ "=" ^ string_of_int !n ^ " "); *)
             Pred ("", Terms [Const !n]) )
     | _ -> e (* error *)
 
