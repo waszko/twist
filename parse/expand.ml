@@ -62,4 +62,6 @@ let rec expand_expr e sets_map =
     | Exists (Terms ts, s2, e1) -> 
         let set = String_map.find s2 sets_map in 
         expand_exists ts set (expand_expr e1 sets_map)
+    | Eq (t1, t2) ->
+        Eq (t1, t2) (* =e *)
     | _ -> e (* is it clearer to give last 2 cases explicitly? *) 

@@ -13,6 +13,8 @@ type expr =
     | Exists of terms * string * expr
     | Pred of string * terms
     | Eq of term * term
+    | True
+    | False
 
 let string_of_term t =
     match t with
@@ -43,3 +45,5 @@ let rec string_of_expr e =
         s1 ^ "(" ^ string_of_terms ts ^ ")"
     | Eq (t1, t2) ->
         string_of_term t1 ^ " = " ^ string_of_term t2
+    | True -> "true"
+    | False -> "false"

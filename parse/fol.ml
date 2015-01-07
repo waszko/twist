@@ -20,15 +20,17 @@ let main instance_file problem_file cnf_file answer_file =
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
     let parsed_problem = Parse.main Lex.token lexbuf in
     close_in problem;
+    (*print_string ( Expr.string_of_expr parsed_problem ^ "\n\n" ); *)
     let t = time_section "Parsing instance...\n" t in
     let instance = Io.read_instance instance_file in
     let t = time_section "Expanding problem...\n" t in
     let expanded = Expand.expand_expr parsed_problem instance in
- (* print_string ( Expr.string_of_expr expanded ^ "\n\n" ); *)
+    (*print_string ( Expr.string_of_expr expanded ^ "\n\n" ); *)   
     let t = time_section "Substituting predicates...\n" t in
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded in
     let t = time_section "Converting to CNF...\n" t in
     let cnf = Cnf.cnf_expr subbed in
+    (*print_string ( Expr.string_of_expr cnf ^ "\n\n" );   *)
     flush stdout; (* ? *)
     let t = time_section "Converting to DIMACS-CNF...\n" t in
     let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
