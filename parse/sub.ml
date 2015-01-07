@@ -54,7 +54,8 @@ let rec sub_expr e =
             rev_map := Int_map.add !n e_str !rev_map;
          (* print_string(e_str ^ "=" ^ string_of_int !n ^ " "); *)
             Pred ("", Terms [Const !n]) )
-    | Forall _ | Exists _ | Eq _ | True | False -> 
+    | Eq _ -> e
+    | Forall _ | Exists _ | True | False -> 
         raise (Unexpected_expr_found (e, "Sub.sub_expr"))
 
 let sub_expr_call e =

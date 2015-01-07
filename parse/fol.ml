@@ -14,6 +14,7 @@ let call_minisat cnf_file answer_file =
     flush stdout
 
 let main instance_file problem_file cnf_file answer_file =
+  try
     let t = Sys.time() in
     Printf.printf "Parsing problem...\n";
     let problem = open_in problem_file in
@@ -41,6 +42,8 @@ let main instance_file problem_file cnf_file answer_file =
     Io.output_answer pred_map answer_file;
     Printf.printf "Total running time: %fs\n\n" t;
     flush stdout
+  with Expr.Unexpected_expr_found (expr, str) ->
+    print_string( "\n" ^ Expr.string_of_expr expr ^ " found in " ^ str ^ "\n")
 
 (* get file names, or defaults if not given *)
 let _ = 
