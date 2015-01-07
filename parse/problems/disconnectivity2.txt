@@ -1,0 +1,6 @@
+(exists x in V (  S(x))) &
+(exists y in V ( ~S(y))) &
+(forall z in V ( forall w in V ( 
+   ( ~ ( (S(z) & (~S(w))) &
+      (exists a b in E ( ((a=z) & (b=w)) | ((a=w) & (b=z))) ) ) )
+) ) )

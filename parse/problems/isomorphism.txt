@@ -1,0 +1,31 @@
+(forall x in V (
+  forall y in W (
+    (~F(x y))
+    |  
+    F(x y)
+  )
+))
+&
+(forall x in V ( exists y in W ( F(x y) ) ) )
+&
+(forall y in W ( exists x in V ( F(x y) ) ) )
+&
+(forall x in V (
+  forall y in W (
+    (forall p in V (
+      (~(F(x y) & F(p y))) | (x=p)
+    ))
+	&
+    (forall q in W (
+      (~(F(x y) & F(x q))) | (y=q)
+    ))
+  )
+))
+&
+((forall x y in E (
+  exists a b in D (
+    (F(x a) & F(y b))
+    |
+    (F(x b) & F(y a))
+  )
+)))
