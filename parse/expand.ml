@@ -1,5 +1,8 @@
 open Expr;;
 
+(* expansion has been attempted on an empty set (return set name?) *)
+exception Set_empty 
+
 let replace_term a b t = 
     match t with
     | Const c -> Const c
@@ -18,14 +21,17 @@ let rec replace_expr a b e =
     | Exists (ts, s1, e1) -> Exists (ts, s1, replace_expr a b e1)
     | Pred (s1, ts) -> Pred (s1, replace_terms a b ts)
     | Eq (t1, t2) -> Eq (replace_term a b t1, replace_term a b t2)
+    | True | False -> 
+        raise (Unexpected_expr_found (e, "Expand.replace_expr"))
 
 (* matches each term with the respective item from within the element, 
  * and calls replace_expr with these two *)
 let rec match_expr ts rs e = 
     assert (List.length ts = List.length rs);
     match ts with (* best to match on ts or rs? *)
-    | t :: [] -> 
-        replace_expr t (List.hd rs) e (* or case [] -> e ? *)
+    | [] -> e
+ (* | t :: [] -> 
+        replace_expr t (List.hd rs) e (* or case [] -> e ? *) *)
     | t :: tl -> 
         match_expr  tl (List.tl rs) ( replace_expr t (List.hd rs) e )
 
@@ -33,12 +39,14 @@ let rec match_expr ts rs e =
  * in the terms to be replaced, one element of the set to replace, and e *)
 let rec expand_forall ts set e =
     match set with 
+    | [] -> raise Set_empty
     | hd :: [] -> match_expr ts hd e
     | hd :: tl -> And (match_expr ts hd e , expand_forall ts tl e)
     (* what can i do about the warning wanting a "[]" case? *)
 
 let rec expand_exists ts set e =
     match set with 
+    | [] -> raise Set_empty 
     | hd :: [] -> match_expr ts hd e
     | hd :: tl -> Or (match_expr ts hd e , expand_exists ts tl e)
 

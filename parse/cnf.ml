@@ -13,6 +13,7 @@ let rec nnf_expr e =
     (* these cases should not appear as after expansion? *)
     | Forall (ts,s1,e1) -> Forall (ts, s1, nnf_expr e1) 
     | Exists (ts,s1,e1) -> Exists (ts, s1, nnf_expr e1)
+    | True | False -> raise (Unexpected_expr_found (e, "Cnf.nnf_expr"))
 
 let rec dist_expr e =
     match e with
@@ -34,6 +35,7 @@ let rec dist_expr e =
     (* these cases should not appear as after expansion? *)
     | Forall (ts,s1,e1) -> Forall (ts, s1, dist_expr e1)
     | Exists (ts,s1,e1) -> Exists (ts, s1, dist_expr e1)
+    | True | False -> raise (Unexpected_expr_found (e, "Cnf.dist_expr"))
 
 let rec eq_expr e =
     match e with

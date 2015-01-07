@@ -43,7 +43,7 @@ let rec sub_expr e =
     | And (e1, e2) -> And (sub_expr e1, sub_expr e2)
     | Or (e1, e2) -> Or (sub_expr e1, sub_expr e2)
     | Not e1 -> Not (sub_expr e1)
-    | Pred (s, ts) -> (* dont care about pred contents.. *)
+    | Pred _ -> (* dont care about pred contents.. *)
         let e_str = string_of_expr e in
         if String_map.mem e_str !map then 
             let sub = String_map.find e_str !map in
@@ -54,7 +54,8 @@ let rec sub_expr e =
             rev_map := Int_map.add !n e_str !rev_map;
          (* print_string(e_str ^ "=" ^ string_of_int !n ^ " "); *)
             Pred ("", Terms [Const !n]) )
-    | _ -> e (* error *)
+    | Forall _ | Exists _ | Eq _ | True | False -> 
+        raise (Unexpected_expr_found (e, "Sub.sub_expr"))
 
 let sub_expr_call e =
     let exp = sub_expr e in (* is this bad? *)

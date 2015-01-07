@@ -1,5 +1,8 @@
 module String_map = Map.Make (String);;
 
+(* currently used only in sat-solver output file *) 
+exception File_format_error of string
+
 (* reads instance sets into map from name to string list list *)
 let read_instance file_name =
     let ic = open_in file_name in
@@ -7,14 +10,18 @@ let read_instance file_name =
     try
         while true do
             let line = input_line ic in 
-            let (name::set) = Str.split (Str.regexp " ") line in (*[]err*)
-            if String_map.mem name !sets_map then
-                let sets = String_map.find name !sets_map in
-                sets_map := String_map.add name (set::sets) !sets_map
-            else
-                sets_map := String_map.add name [set] !sets_map
+         (* let (name::set) = Str.split (Str.regexp " ") line in *)
+            match Str.split (Str.regexp " ") line with
+            | [] -> () (* skip empty lines *) 
+            | (name::set) ->
+                if String_map.mem name !sets_map then
+                    let sets = String_map.find name !sets_map in
+                    sets_map := String_map.add name (set::sets) !sets_map
+                else
+                    sets_map := String_map.add name [set] !sets_map
         done; !sets_map
-    with End_of_file ->
+    with 
+    | End_of_file ->
         close_in ic;
         !sets_map 
 
@@ -65,8 +72,8 @@ let output_answer pred_map file_name =
             print_string ("Satisfying assignment:" ^ preds ^ "\n") )
         else if line = "UNSAT" then (
             print_string "No satisfying assignment exists\n"; )
-        else
-            print_string "FILE FORMAT ERROR\n"; (* throw error? *)
+        else (
+            raise (File_format_error file_name) );
         flush stdout;    
         close_in ic       
     with e ->              

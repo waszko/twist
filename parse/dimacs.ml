@@ -31,9 +31,8 @@ let rec dimacs_of_expr e buff =
     | Pred (s1, ts) ->
         Buffer.add_string buff s1;
         dimacs_of_terms ts buff
-    (* forall, exists, eq ? Use proper error? *)
-    | _ ->
-        print_string "ERROR\n"
+    | Forall _ | Exists _ | Eq _ | True | False ->
+        raise (Unexpected_expr_found (e, "Dimacs.dimacs_of_expr"))
 
 (* changed to use string buffer as is much faster than string concat *)
 let dimacs_of_expr_call e num_vars = 

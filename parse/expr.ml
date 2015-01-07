@@ -16,6 +16,9 @@ type expr =
     | True
     | False
 
+(* when found an unexpected 'expr' in function 'string' *)
+exception Unexpected_expr_found of (expr * string)
+
 let string_of_term t =
     match t with
     | Var v -> v
