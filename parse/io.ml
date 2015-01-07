@@ -26,6 +26,7 @@ let write_cnf str file_name =
 
 
 (* convert list of pred substitutions into string of all preds (str) *)
+(* not used currently (replaced by get_pos_preds below) *)
 let rec get_preds sub_list map str =
     match sub_list with
     | [] -> str
@@ -39,6 +40,18 @@ let rec get_preds sub_list map str =
                 get_preds tl map ( str ^ pre ^
                     (Sub.Int_map.find (int_of_string sub) map) )
 
+(* like above but only returns positive predicates *)
+let rec get_pos_preds sub_list map str =
+    match sub_list with
+    | [] -> str
+    | last::[] -> (* skip last element which is 0 *)
+                get_pos_preds [] map str
+    | hd::tl -> (* if preds are false, they are preceded by a '-' *)
+                let neg = (hd.[0] = '-') in
+                if neg then get_pos_preds tl map str
+                else get_pos_preds tl map (str ^ " " ^ 
+                    (Sub.Int_map.find (int_of_string hd) map) )
+
 (* read output of sat-solver to find satisfying assignment (or not) *)
 let output_answer pred_map file_name =
     let ic = open_in file_name in
@@ -48,7 +61,7 @@ let output_answer pred_map file_name =
             let line2 = input_line ic in
             let vars = Str.split (Str.regexp " ") line2 in
             (* map back to predicates *)
-            let preds = get_preds vars pred_map "" in
+            let preds = get_pos_preds vars pred_map "" in
             print_string ("Satisfying assignment:" ^ preds ^ "\n") )
         else if line = "UNSAT" then (
             print_string "No satisfying assignment exists\n"; )
