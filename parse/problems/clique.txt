@@ -1,0 +1,21 @@
+(forall x in V (
+  forall y in U (
+    (~F(x y)) | (C(x))
+  )
+) )
+&
+(forall x in V (
+  (~C(x)) | exists y in U ( (F(x y) ) & 
+	          (forall z in U ( (~F(x z)) | (y=z) ) )
+) ) )
+&
+(forall y in U (
+   exists x in V ( (F(x y) & C(x)) &
+              (forall z in V ( (~(F(z y) & C(z))) | (x=z)))
+) ) )
+&
+(forall x in V (
+  forall y in V (    (x=y) |
+    (~(C(x) & C(y))) | (exists a b in E ( ((x=a)&(y=b)) | ((x=b)&(y=a)) )) 
+  )
+) )

@@ -26,7 +26,7 @@ let main instance_file problem_file cnf_file answer_file =
     let instance = Io.read_instance instance_file in
     let t = time_section "Expanding problem...\n" t in
     let expanded = Expand.expand_expr parsed_problem instance in
-    (*print_string ( Expr.string_of_expr expanded ^ "\n\n" ); *)   
+    (*print_string ( Expr.string_of_expr expanded ^ "\n\n" );    *)
     let t = time_section "Substituting predicates...\n" t in
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded in
     let t = time_section "Converting to CNF...\n" t in
