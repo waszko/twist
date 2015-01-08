@@ -9,6 +9,9 @@ E 3 1
 E 1 4
 E 4 5
 E 3 5
+E 1 5
+E 3 4
 U a
 U b
 U c
+U d

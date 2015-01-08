@@ -1,5 +1,6 @@
 open Expr;;
 
+(* converts e to NNF *)
 let rec nnf_expr e =
     match e with
     | Not (And(e1,e2)) -> nnf_expr ( Or (Not e1,Not e2) )
@@ -9,19 +10,15 @@ let rec nnf_expr e =
     | Or  (e1,e2) ->  Or (nnf_expr e1, nnf_expr e2)
     | Not e1 ->  Not (nnf_expr e1) (* shouldn't act be used *)
     | Pred (s1,ts) -> Pred (s1, ts) (* RHS just e? Use _? (also below) *)
-    | Eq (t1,t2) -> Eq (t1, t2)
-    (* these cases should not appear as after expansion? *)
-    | Forall (ts,s1,e1) -> Forall (ts, s1, nnf_expr e1) 
-    | Exists (ts,s1,e1) -> Exists (ts, s1, nnf_expr e1)
-    | True | False -> raise (Unexpected_expr_found (e, "Cnf.nnf_expr"))
+    | Forall _ | Exists _ | Eq _ | True | False -> 
+        raise (Unexpected_expr_found (e, "Cnf.nnf_expr"))
 
+(* distributes ORs inwards over ANDs, e.g: p|(q&r) -> (p|q)&(p|r) *)
 let rec dist_expr e =
     match e with
-    | Or (And(e1, e2), e3) -> dist_expr ( 
-        And(dist_expr(Or(e1,e3)),dist_expr(Or(e2,e3))) ) (* recurse dist_expr on more parts? *)
-    | Or (e1, And(e2, e3)) -> dist_expr (
-        And(dist_expr(Or(e1,e2)),dist_expr(Or(e1,e3))) )
-    | Or  (e1,e2) -> (* seems more complex than it should be (xmas error)*)
+    | Or (And(e1, e2), e3) -> dist_expr ( And(Or(e1,e3), Or(e2,e3)) )
+    | Or (e1, And(e2, e3)) -> dist_expr ( And(Or(e1,e2), Or(e1,e3)) )
+    | Or  (e1, e2) -> (* seems more complex than needed (xmas error) *)
          let e1 = dist_expr e1 in
          let e2 = dist_expr e2 in (
          match e1, e2 with 
@@ -29,14 +26,13 @@ let rec dist_expr e =
          | _, And (_, _) -> dist_expr ( Or (e1, e2) )
          | _, _ -> Or (e1, e2) )
     | And (e1,e2) -> And (dist_expr e1, dist_expr e2)
-    | Not e1 ->  Not (dist_expr e1) (* e1 must be term? So not needed? *)
-    | Pred (s1,ts) -> Pred (s1, ts) (* RHS just e? Use _? (also below) *)
-    | Eq (t1,t2) -> Eq (t1, t2)
-    (* these cases should not appear as after expansion? *)
-    | Forall (ts,s1,e1) -> Forall (ts, s1, dist_expr e1)
-    | Exists (ts,s1,e1) -> Exists (ts, s1, dist_expr e1)
-    | True | False -> raise (Unexpected_expr_found (e, "Cnf.dist_expr"))
+    | Not e1 ->  Not e1 (* e1 must be term so recurse not needed *)
+    | Pred (s1,ts) -> Pred (s1, ts) (* RHS just e? Use _? *)
+    | Forall _ | Exists _ | Eq _ | True | False -> 
+        raise (Unexpected_expr_found (e, "Cnf.dist_expr"))
 
+(* tests equality of predicates to convert a=b into {t,f}, and then 
+ * distributes these to reduce ANDs and ORs *) 
 let rec eq_expr e =
     match e with
     | And (e1, e2) -> (
@@ -70,4 +66,5 @@ let rec eq_expr e =
     | True -> True
     | False -> False
 
+(* converts e into CNF *)
 let cnf_expr e = dist_expr ( nnf_expr (eq_expr e) )
