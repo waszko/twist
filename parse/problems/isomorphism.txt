@@ -13,11 +13,11 @@
 (forall x in V (
   forall y in W (
     (forall p in V (
-      (~(F(x y) & F(p y))) | (x=p)
+      (F(x y) & F(p y)) -> x=p
     ))
 	&
     (forall q in W (
-      (~(F(x y) & F(x q))) | (y=q)
+      (F(x y) & F(x q)) -> y=q
     ))
   )
 ))

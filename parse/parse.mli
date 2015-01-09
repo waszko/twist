@@ -8,6 +8,7 @@ type token =
   | AND
   | OR
   | NOT
+  | IMPLIES
   | EQUALS
   | LPAREN
   | RPAREN

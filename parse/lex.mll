@@ -14,6 +14,7 @@ rule token = parse
     | '&'                  { AND }
     | '|'                  { OR }
     | '~'                  { NOT }
+    | "->"                 { IMPLIES }
     | '='                  { EQUALS }
     | '('                  { LPAREN }
     | ')'                  { RPAREN }

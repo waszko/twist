@@ -5,7 +5,7 @@ open Expr (* contains expr type declarations *)
 %token <int> INT
 %token FORALL EXISTS IN 
 %token <string> LCHAR UCHAR /* ? char ? */
-%token AND OR NOT EQUALS
+%token AND OR NOT IMPLIES EQUALS
 %token LPAREN RPAREN SEMICOLON EOF
 
 %left AND OR                /* ?? */ 
@@ -23,6 +23,7 @@ sentence:
     | sentence AND sentence                  {And($1,$3)}
     | sentence OR sentence                   {Or($1,$3)}
     | NOT sentence                           {Not($2)}
+    | sentence IMPLIES sentence              {Or(Not($1),$3)}
     | LPAREN sentence RPAREN                 {$2}
     | FORALL term_list IN UCHAR sentence {Forall(Terms(List.rev $2),$4,$5)}
     | EXISTS term_list IN UCHAR sentence {Exists(Terms(List.rev $2),$4,$5)}
