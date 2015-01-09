@@ -28,8 +28,8 @@ let rec dimacs_of_expr e buff =
     | Not e1 -> 
         Buffer.add_string buff "-";
         dimacs_of_expr e1 buff
-    | Pred (s1, ts) ->
-        Buffer.add_string buff s1;
+   | Pred (s1, ts) ->
+        (* Buffer.add_string buff s1; (* s1 empty due to substitution *)*)
         dimacs_of_terms ts buff
     | Forall _ | Exists _ | Eq _ | True | False ->
         raise (Unexpected_expr_found (e, "Dimacs.dimacs_of_expr"))
