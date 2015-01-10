@@ -8,7 +8,11 @@ open Expr (* contains expr type declarations *)
 %token AND OR NOT IMPLIES EQUALS
 %token LPAREN RPAREN SEMICOLON EOF
 
-%left AND OR                /* ?? */ 
+%right IMPLIES
+%left OR
+%left AND 
+%right NOT
+
 %start main 
 %type <Expr.expr> main           /* type? */ 
 
