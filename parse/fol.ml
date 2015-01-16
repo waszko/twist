@@ -13,7 +13,15 @@ let call_minisat cnf_file answer_file =
     print_newline();
     flush stdout
 
-let main instance_file problem_file cnf_file answer_file =
+(* call minisat+ to convert pbc into cnf *)
+let call_minisat_plus pbc_file cnf_file =
+    let cmd = "../sat_solvers/minisat+/minisat+ -cnf=" 
+              ^ cnf_file ^ " " ^ pbc_file in
+    print_string("Minisat+ exit code: " ^ string_of_int (Sys.command cmd));
+    print_newline();
+    flush stdout
+
+let main instance_file problem_file pbc_file cnf_file answer_file =
   try
     let t = Sys.time() in
     Printf.printf "Parsing problem...\n";
@@ -33,9 +41,11 @@ let main instance_file problem_file cnf_file answer_file =
     let cnf = Cnf.cnf_expr subbed in
     (*print_string ( Expr.string_of_expr cnf ^ "\n\n" );   *)
     flush stdout; (* ? *)
-    let t = time_section "Converting to DIMACS-CNF...\n" t in
-    let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
-    Io.write_cnf dimacs cnf_file;
+    let t = time_section "Converting to PBC...\n" t in
+    let pbc = Pbc.pbc_of_expr_call cnf nbvars in
+    Io.write_cnf pbc pbc_file;
+    let t = time_section "Running minisat+ to convert PBC to CNF...\n" t in
+    call_minisat_plus pbc_file cnf_file;
     let t = time_section "Running SAT-solver...\n" t in
     call_minisat cnf_file answer_file;
     let t = time_section "Replacing predicates...\n" t in
@@ -52,8 +62,10 @@ let _ =
                                          else "graphs/basic.txt" in
     let problem_file  = if num_args >= 3 then Sys.argv.(2)
                                          else "problems/3col.txt"  in
-    let cnf_file      = if num_args >= 4 then Sys.argv.(3)
+    let pbc_file      = if num_args >= 4 then Sys.argv.(3)
+                                         else "out.pbc"      in
+    let cnf_file      = if num_args >= 5 then Sys.argv.(4)
                                          else "out.cnf"      in
-    let answer_file   = if num_args >= 5 then Sys.argv.(4)
+    let answer_file   = if num_args >= 6 then Sys.argv.(5)
                                          else "out.txt"      in
-    main instance_file problem_file cnf_file answer_file
+    main instance_file problem_file pbc_file cnf_file answer_file

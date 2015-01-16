@@ -47,13 +47,13 @@ let rec sub_expr e =
         let e_str = string_of_expr e in
         if String_map.mem e_str !map then 
             let sub = String_map.find e_str !map in
-            Pred ("", Terms [Const sub])
+            Pred ("", Terms [Var ("x" ^ string_of_int sub)])
         else ( 
             n := !n +1;
             map := String_map.add e_str !n !map;
             rev_map := Int_map.add !n e_str !rev_map;
          (* print_string(e_str ^ "=" ^ string_of_int !n ^ " "); *)
-            Pred ("", Terms [Const !n]) )
+            Pred ("", Terms [Var ("x" ^ string_of_int !n)]) )
     | Eq _ -> e
     | Forall _ | Exists _ | True | False -> 
         raise (Unexpected_expr_found (e, "Sub.sub_expr"))
