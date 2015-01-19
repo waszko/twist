@@ -9,6 +9,12 @@
 *.cmxa
 parse/._d/*
 parse/._ncdi/*
+parse/lex.ml
+parse/parse.ml
+parse/parse.mli
+parse/fol
+parse/fol.byte
+parse/fol.native
 sat_solvers/zipped/*
 sat_solvers/zchaff64/*
 sat_solvers/MiniSat-ocaml-0.2.v1.14/*
