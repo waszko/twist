@@ -10,6 +10,8 @@ let rec nnf_expr e =
     | Or  (e1,e2) ->  Or (nnf_expr e1, nnf_expr e2)
     | Not e1 ->  Not (nnf_expr e1) (* shouldn't act be used *)
     | Pred (s1,ts) -> Pred (s1, ts) (* RHS just e? Use _? (also below) *)
+    | Card1 _ -> e
+    | Card2 _ -> e
     | Forall _ | Exists _ | Eq _ | True | False -> 
         raise (Unexpected_expr_found (e, "Cnf.nnf_expr"))
 
@@ -28,6 +30,8 @@ let rec dist_expr e =
     | And (e1,e2) -> And (dist_expr e1, dist_expr e2)
     | Not e1 ->  Not e1 (* e1 must be term so recurse not needed *)
     | Pred (s1,ts) -> Pred (s1, ts) (* RHS just e? Use _? *)
+    | Card1 _ -> e
+    | Card2 _ -> e
     | Forall _ | Exists _ | Eq _ | True | False -> 
         raise (Unexpected_expr_found (e, "Cnf.dist_expr"))
 
@@ -65,6 +69,8 @@ let rec eq_expr e =
     | Exists (ts, s1, e1) -> Exists (ts, s1, eq_expr e1)
     | True -> True
     | False -> False
+    | Card1 _ -> e
+    | Card2 _ -> e
 
 (* converts e into CNF *)
 let cnf_expr e = dist_expr ( nnf_expr (eq_expr e) )

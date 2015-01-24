@@ -13,13 +13,17 @@ let call_minisat cnf_file answer_file =
     print_newline();
     flush stdout
 
+exception Naively_unsat 
+
 (* call minisat+ to convert pbc into cnf *)
 let call_minisat_plus pbc_file cnf_file =
     let cmd = "../sat_solvers/minisat+/minisat+ -cnf=" 
               ^ cnf_file ^ " " ^ pbc_file in
-    print_string("Minisat+ exit code: " ^ string_of_int (Sys.command cmd));
+    let exit_code = Sys.command cmd in
+    print_string("Minisat+ exit code: " ^ string_of_int (exit_code));
     print_newline();
-    flush stdout
+    flush stdout;
+    if exit_code = 20 then raise Naively_unsat 
 
 let main instance_file problem_file pbc_file cnf_file answer_file =
   try

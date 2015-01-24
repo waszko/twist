@@ -3,6 +3,7 @@ type token =
   | FORALL
   | EXISTS
   | IN
+  | OF
   | LCHAR of (string)
   | UCHAR of (string)
   | AND

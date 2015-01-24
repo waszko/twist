@@ -15,6 +15,8 @@ type expr =
     | Eq of term * term
     | True
     | False
+    | Card1 of string * string * string
+    | Card2 of expr list * int
 
 (* when found an unexpected 'expr' in function 'string' *)
 exception Unexpected_expr_found of (expr * string)

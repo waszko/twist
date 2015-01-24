@@ -9,6 +9,7 @@ rule token = parse
     | "forall"             { FORALL }
     | "exists"             { EXISTS }
     | "in"                 { IN }
+    | "of"                 { OF }
     | ['a'-'z']+ as id     { LCHAR id } (* dunno about id thing *) 
     | ['A'-'Z']+ as id     { UCHAR id } (* ... also make these chars? *)
     | '&'                  { AND }
