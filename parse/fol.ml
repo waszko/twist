@@ -3,8 +3,10 @@ let problem_file = ref ""
 let instance_file = ref ""
 let anon_args = ref 0
 let verbose = ref false
+let pbc = ref false
 let sat_solver = ref "../sat_solvers/minisat/minisat" 
 let cnf_file = ref "out.cnf"
+let pbc_file = ref "out.pbc"
 let answer_file = ref "out.txt"
 let set_file file_ref name = file_ref := name
 
@@ -17,10 +19,13 @@ let set_anon_arg file =
 
 let option_spec = [
      ("-v", Arg.Set verbose, "enable verbose output"); 
+     ("-p", Arg.Set pbc, "enable pseudo-boolean constraints"); 
      ("-s", Arg.String (set_file sat_solver), 
          "specify SAT-solver location (default=" ^ !sat_solver ^ ")"); 
      ("-c", Arg.String (set_file cnf_file), 
          "specify CNF output file (default=" ^ !cnf_file ^ ")"); 
+     ("-b", Arg.String (set_file pbc_file), 
+         "specify PBC output file (default=" ^ !pbc_file ^ ")"); 
      ("-a", Arg.String (set_file answer_file), 
          "specify SAT-solver output file (default=" ^ !answer_file ^ ")"); 
     ] 
@@ -47,6 +52,18 @@ let call_minisat _ =
 (* print_string only if verbose enabled *)
 let print_verbose str = if !verbose then print_string str
 
+exception Naively_unsat 
+
+(* call minisat+ to convert pbc into cnf *)
+let call_minisat_plus pbc_file cnf_file =
+    let cmd = "../sat_solvers/minisat+/minisat+ -cnf=" (* make arg *)
+              ^ cnf_file ^ " " ^ pbc_file in
+    let exit_code = Sys.command cmd in
+    print_string("Minisat+ exit code: " ^ string_of_int (exit_code));
+    print_newline();
+    flush stdout;
+    if exit_code = 20 then raise Naively_unsat 
+
 let _ =
   try
     assert (!anon_args >= 2); (* give better output for this *)
@@ -63,14 +80,21 @@ let _ =
     let expanded = Expand.expand_expr parsed_problem instance in
     print_verbose ( Expr.string_of_expr expanded ^ "\n\n" );    
     let t = time_section "Substituting predicates...\n" t in
-    let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded in
+    let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded !pbc in
     let t = time_section "Converting to CNF...\n" t in
     let cnf = Cnf.cnf_expr subbed in
     print_verbose ( Expr.string_of_expr cnf ^ "\n\n" );   
     flush stdout; (* ? *)
-    let t = time_section "Converting to DIMACS-CNF...\n" t in
-    let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
-    Io.write_cnf dimacs !cnf_file;
+	if !pbc then ( (* do t's work in this 'if then else' block? *)
+        let t = time_section "Converting to PBC...\n" t in
+        let pbc = Pbc.pbc_of_expr_call cnf nbvars in
+        Io.write_cnf pbc !pbc_file;
+        let t = time_section "Converting PBC to CNF with minisat+...\n" t in
+        call_minisat_plus !pbc_file !cnf_file; )
+    else (
+        let t = time_section "Converting to DIMACS-CNF...\n" t in
+        let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
+        Io.write_cnf dimacs !cnf_file; );
     let t = time_section "Running SAT-solver...\n" t in
     call_minisat ();
     let t = time_section "Replacing predicates...\n" t in

@@ -38,26 +38,38 @@ let map = ref String_map.empty (* map from pred to substitution (int) *)
                                (* CANT GET THIS TO WORK WITH PRED MAP :( *)
 let rev_map = ref Int_map.empty (* maps subs to preds to decode answer *)
 
+let pbc = ref false
+
+(* substitute pred p for var (possibly defining new substitution) *)
+let sub_pred p =
+    let p_str = string_of_expr p in
+    if String_map.mem p_str !map then
+        let sub = String_map.find p_str !map in
+        if !pbc then
+            Pred ("", Terms[Var ("x" ^ string_of_int sub)])
+        else 
+            Pred ("", Terms[Const sub])
+    else (
+        n := !n +1;
+        map := String_map.add p_str !n !map;
+        rev_map := Int_map.add !n p_str !rev_map;
+        if !pbc then
+            Pred("", Terms[Var ("x" ^ string_of_int !n)]) 
+        else 
+            Pred ("", Terms[Const !n]) )
+    
 let rec sub_expr e = 
     match e with
     | And (e1, e2) -> And (sub_expr e1, sub_expr e2)
     | Or (e1, e2) -> Or (sub_expr e1, sub_expr e2)
     | Not e1 -> Not (sub_expr e1)
-    | Pred _ -> (* dont care about pred contents.. *)
-        let e_str = string_of_expr e in
-        if String_map.mem e_str !map then 
-            let sub = String_map.find e_str !map in
-            Pred ("", Terms [Const sub])
-        else ( 
-            n := !n +1;
-            map := String_map.add e_str !n !map;
-            rev_map := Int_map.add !n e_str !rev_map;
-         (* print_string(e_str ^ "=" ^ string_of_int !n ^ " "); *)
-            Pred ("", Terms [Const !n]) )
+    | Pred _ -> sub_pred e 
     | Eq _ -> e
-    | Forall _ | Exists _ | True | False -> 
+    | Card2 (preds, k) -> Card2 (List.rev_map sub_pred preds, k)
+    | Forall _ | Exists _ | True | False | Card1 _ -> 
         raise (Unexpected_expr_found (e, "Sub.sub_expr"))
 
-let sub_expr_call e =
+let sub_expr_call e pbc_setting =
+    pbc := pbc_setting;
     let exp = sub_expr e in (* is this bad? *)
     (exp, !n, !rev_map)

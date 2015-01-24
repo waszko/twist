@@ -21,7 +21,7 @@ let rec replace_expr a b e =
     | Exists (ts, s1, e1) -> Exists (ts, s1, replace_expr a b e1)
     | Pred (s1, ts) -> Pred (s1, replace_terms a b ts)
     | Eq (t1, t2) -> Eq (replace_term a b t1, replace_term a b t2)
-    | True | False -> 
+    | True | False | Card1 _ | Card2 _ -> 
         raise (Unexpected_expr_found (e, "Expand.replace_expr"))
 
 (* matches each term with the respective item from within the element, 
@@ -50,6 +50,20 @@ let rec expand_exists ts set e =
     | hd :: [] -> match_expr ts hd e
     | hd :: tl -> Or (match_expr ts hd e , expand_exists ts tl e)
 
+(* given a tuple of vars, generate a list of terms for each var in tuple *)
+let rec gen_terms vars terms =
+    match vars with
+    | [] -> Terms(terms)
+    | hd :: tl -> gen_terms tl (Var(hd)::terms) (* reorder cons? *)
+
+(* given pred UCHAR p and list of tuples set, construct a list of preds 
+ * P(t) for each tuple t in set *)
+let rec gen_preds p set preds = 
+    match set with 
+    | [] -> preds
+    | hd :: tl -> let terms = gen_terms hd [] in
+                  gen_preds p tl (Pred(p,terms)::preds) (*reorder cons?*)
+
 (* do i need to keep repeating this everywhere? *)
 module String_map = Map.Make (String);;
 
@@ -72,4 +86,10 @@ let rec expand_expr e sets_map =
         expand_exists ts set (expand_expr e1 sets_map)
     | Eq (t1, t2) ->
         Eq (t1, t2) (* =e *)
+    | Card1(p, s, k) ->
+        let set = String_map.find s sets_map in
+        let k = int_of_string ( (*should only be 1 k (an int) *)
+            List.hd (List.hd (String_map.find k sets_map))) in
+        let preds = gen_preds p set [] in
+        Card2(preds, k)
     | _ -> e (* is it clearer to give last 2 cases explicitly? *) 
