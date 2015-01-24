@@ -31,7 +31,7 @@ let rec dimacs_of_expr e buff =
    | Pred (s1, ts) ->
         (* Buffer.add_string buff s1; (* s1 empty due to substitution *)*)
         dimacs_of_terms ts buff
-    | Forall _ | Exists _ | Eq _ | True | False ->
+    | Forall _ | Exists _ | Eq _ | True | False | Card1 _ | Card2 _ ->
         raise (Unexpected_expr_found (e, "Dimacs.dimacs_of_expr"))
 
 (* changed to use string buffer as is much faster than string concat *)
