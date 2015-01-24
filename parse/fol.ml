@@ -9,6 +9,7 @@ let cnf_file = ref "out.cnf"
 let pbc_file = ref "out.pbc"
 let answer_file = ref "out.txt"
 let set_file file_ref name = file_ref := name
+let time = ref 0.0
 
 let set_anon_arg file =
    anon_args := !anon_args + 1;
@@ -35,12 +36,12 @@ let usage_msg = "Usage: fol.byte|native [options] [<problem file>] \
 
 let _ = Arg.parse option_spec set_anon_arg usage_msg
 
-let time_section section_label prev_time = 
+let time_section section_label = 
     let current_time = Sys.time() in
-    Printf.printf "Time taken: %fs\n\n" (current_time -. prev_time);
+    Printf.printf "Time taken: %fs\n\n" (current_time -. !time);
     Printf.printf section_label;
     flush stdout; (* ? *)
-    current_time
+    time := current_time
 
 (* call minisat on "out.cnf", storing result in "out.txt" *)
 let call_minisat _ =
@@ -67,39 +68,39 @@ let call_minisat_plus pbc_file cnf_file =
 let _ =
   try
     assert (!anon_args >= 2); (* give better output for this *)
-    let t = Sys.time() in
+    time := Sys.time();
     Printf.printf "Parsing problem...\n";
     let problem = open_in !problem_file in
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
     let parsed_problem = Parse.main Lex.token lexbuf in
     close_in problem;
     print_verbose ( Expr.string_of_expr parsed_problem ^ "\n\n" ); 
-    let t = time_section "Parsing instance...\n" t in
+    time_section "Parsing instance...\n";
     let instance = Io.read_instance !instance_file in
-    let t = time_section "Expanding problem...\n" t in
+    time_section "Expanding problem...\n";
     let expanded = Expand.expand_expr parsed_problem instance in
     print_verbose ( Expr.string_of_expr expanded ^ "\n\n" );    
-    let t = time_section "Substituting predicates...\n" t in
+    time_section "Substituting predicates...\n";
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded !pbc in
-    let t = time_section "Converting to CNF...\n" t in
+    time_section "Converting to CNF...\n";
     let cnf = Cnf.cnf_expr subbed in
     print_verbose ( Expr.string_of_expr cnf ^ "\n\n" );   
     flush stdout; (* ? *)
 	if !pbc then ( (* do t's work in this 'if then else' block? *)
-        let t = time_section "Converting to PBC...\n" t in
+        time_section "Converting to PBC...\n";
         let pbc = Pbc.pbc_of_expr_call cnf nbvars in
         Io.write_cnf pbc !pbc_file;
-        let t = time_section "Converting PBC to CNF with minisat+...\n" t in
+        time_section "Converting PBC to CNF with minisat+...\n";
         call_minisat_plus !pbc_file !cnf_file; )
     else (
-        let t = time_section "Converting to DIMACS-CNF...\n" t in
+        time_section "Converting to DIMACS-CNF...\n";
         let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
         Io.write_cnf dimacs !cnf_file; );
-    let t = time_section "Running SAT-solver...\n" t in
+    time_section "Running SAT-solver...\n";
     call_minisat ();
-    let t = time_section "Replacing predicates...\n" t in
+    time_section "Replacing predicates...\n";
     Io.output_answer pred_map !answer_file;
-    Printf.printf "Total running time: %fs\n\n" t;
+    Printf.printf "Total running time: %fs\n\n" !time;
     flush stdout
   with Expr.Unexpected_expr_found (expr, str) ->
     print_string( "\n" ^ Expr.string_of_expr expr ^ " found in " ^ str ^ "\n")
