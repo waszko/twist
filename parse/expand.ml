@@ -53,7 +53,7 @@ let rec expand_exists ts set e =
 (* given a tuple of vars, generate a list of terms for each var in tuple *)
 let rec gen_terms vars terms =
     match vars with
-    | [] -> Terms(terms)
+    | [] -> Terms(List.rev terms)
     | hd :: tl -> gen_terms tl (Var(hd)::terms) (* reorder cons? *)
 
 (* given pred UCHAR p and list of tuples set, construct a list of preds 
