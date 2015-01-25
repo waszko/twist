@@ -22,8 +22,8 @@ let rec pbc_of_terms ts buff =
 (* add cardinality constraint of the form P(1) + P(2) + P(3) >= k *)
 let rec card_const preds k buff =
     match preds with (* im converting k to int then back to string... *)
-    | [] -> 
-        Buffer.add_string buff (">= " ^ string_of_int k ^ ";\n") ;
+    | [] -> (* is = (not <=) allowed by all solvers? *)
+        Buffer.add_string buff ("= " ^ string_of_int k ^ ";\n") ;
         place_rhs := false
     | Pred(_,ts) :: tl -> 
         Buffer.add_string buff "+";
