@@ -1,0 +1,7 @@
+(forall v in V ( I(v) | ~I(v) ) )
+&
+(forall a in V ( forall b in V (
+  (I(a) & I(b)) -> ~(exists x y in E (((x=a) & (y=b)) | ((x=b) & (y=a))) )
+)))
+&
+(|I of V| = K)

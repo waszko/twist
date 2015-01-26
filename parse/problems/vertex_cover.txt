@@ -1,0 +1,5 @@
+(forall v in V ( C(v) | ~C(v) ) )
+&
+(forall x y in E ( C(x) | C(y) ) )
+&
+(|C of V| = K)
