@@ -31,46 +31,45 @@ let write_cnf str file_name =
     Printf.fprintf oc "%s" str;
     close_out oc
 
+let skip_last = ref false (* skip last pred in solution? *)
 
 (* convert list of pred substitutions into string of all preds (str) *)
 (* not used currently (replaced by get_pos_preds below) *)
 let rec get_preds sub_list map str =
     match sub_list with
     | [] -> str
-    | last::[] -> (* skip last element which is 0 *)
-                get_preds [] map str
     | hd::tl -> (* if preds are false, they are preceded by a '-' *)
-                let neg = (hd.[0] = '-') in
-                let pre = (if neg then " -" else " ") in
-                let sub = (if not neg then hd else
-                           String.sub hd 1 (String.length hd - 1) ) in
-                get_preds tl map ( str ^ pre ^
-                    (Sub.Int_map.find (int_of_string sub) map) )
+          if !skip_last && tl = [] then get_preds [] map str else 
+          let neg = (hd.[0] = '-') in
+          let pre = (if neg then " -" else " ") in
+          let sub = (if not neg then hd else
+                     String.sub hd 1 (String.length hd - 1) ) in
+          get_preds tl map ( str ^ pre ^ (Sub.String_map.find sub map) )
 
 (* like above but only returns positive predicates *)
 let rec get_pos_preds sub_list map str =
     match sub_list with
     | [] -> str
-    | last::[] -> (* skip last element which is 0 *)
-                get_pos_preds [] map str
     | hd::tl -> (* if preds are false, they are preceded by a '-' *)
-                let neg = (hd.[0] = '-') in
-                if neg then get_pos_preds tl map str
-                else get_pos_preds tl map (str ^ " " ^ 
-                    (Sub.Int_map.find (int_of_string hd) map) )
+          if !skip_last && tl = [] then get_pos_preds [] map str else 
+          let neg = (hd.[0] = '-') in
+          if neg then get_pos_preds tl map str
+          else get_pos_preds tl map (str ^ " " ^ 
+              (Sub.String_map.find hd map) )
 
 (* read output of sat-solver to find satisfying assignment (or not) *)
-let output_answer pred_map file_name =
+let output_answer pred_map file_name trailing_0 =
+    skip_last := trailing_0; (* answer file has a trailing 0 predicate *)
     let ic = open_in file_name in
     try 
         let line = input_line ic in
-        if line = "SAT" then (
+        if (line = "SAT" || line = "SATISFIABLE") then (
             let line2 = input_line ic in
             let vars = Str.split (Str.regexp " ") line2 in
             (* map back to predicates *)
             let preds = get_pos_preds vars pred_map "" in
             print_string ("Satisfying assignment:" ^ preds ^ "\n") )
-        else if line = "UNSAT" then (
+        else if (line = "UNSAT" || line = "UNSATISFIABLE") then (
             print_string "No satisfying assignment exists\n"; )
         else (
             raise (File_format_error file_name) );

@@ -56,9 +56,10 @@ let print_verbose str = if !verbose then print_string str
 exception Naively_unsat 
 
 (* call minisat+ to convert pbc into cnf *)
-let call_minisat_plus pbc_file cnf_file =
-    let cmd = "../sat_solvers/minisat+/minisat+ -cnf=" (* make arg *)
-              ^ cnf_file ^ " " ^ pbc_file in
+let call_minisat_plus _ =
+    let cmd = "../sat_solvers/minisat+/minisat+ " (* make arg *)
+              ^ !pbc_file ^ " -v0 | cut -c 3- > " ^ !answer_file in
+              (* ^ cut as minisat adds 2 unwanted chars *)
     let exit_code = Sys.command cmd in
     print_string("Minisat+ exit code: " ^ string_of_int (exit_code));
     print_newline();
@@ -90,16 +91,16 @@ let _ =
         time_section "Converting to PBC...\n";
         let pbc = Pbc.pbc_of_expr_call cnf nbvars in
         Io.write_cnf pbc !pbc_file;
-        time_section "Converting PBC to CNF with minisat+...\n";
-        call_minisat_plus !pbc_file !cnf_file; )
+        time_section "Running PBC-solver...\n";
+        call_minisat_plus (); )
     else (
         time_section "Converting to DIMACS-CNF...\n";
         let dimacs = Dimacs.dimacs_of_expr_call cnf nbvars in
-        Io.write_cnf dimacs !cnf_file; );
-    time_section "Running SAT-solver...\n";
-    call_minisat ();
+        Io.write_cnf dimacs !cnf_file; 
+        time_section "Running SAT-solver...\n";
+        call_minisat (); );
     time_section "Replacing predicates...\n";
-    Io.output_answer pred_map !answer_file;
+    Io.output_answer pred_map !answer_file (not !pbc);
     Printf.printf "Total running time: %fs\n\n" !time;
     flush stdout
   with Expr.Unexpected_expr_found (expr, str) ->

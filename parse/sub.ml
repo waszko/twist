@@ -34,9 +34,9 @@ module Int_map = Map.Make(struct type t = int let compare = compare end)
 
 (* is using refs ok? Or better to put back as args (more complex code) *)
 let n = ref 0 (* highest substitution so far *)
-let map = ref String_map.empty (* map from pred to substitution (int) *)
+let map = ref String_map.empty (* map from pred to substitution (int str)*)
                                (* CANT GET THIS TO WORK WITH PRED MAP :( *)
-let rev_map = ref Int_map.empty (* maps subs to preds to decode answer *)
+let rev_map = ref String_map.empty (* maps subs to preds to decode answer*)
 
 let pbc = ref false
 
@@ -45,18 +45,14 @@ let sub_pred p =
     let p_str = string_of_expr p in
     if String_map.mem p_str !map then
         let sub = String_map.find p_str !map in
-        if !pbc then
-            Pred ("", Terms[Var ("x" ^ string_of_int sub)])
-        else 
-            Pred ("", Terms[Const sub])
+        Pred ("", Terms[Var sub])
     else (
         n := !n +1;
-        map := String_map.add p_str !n !map;
-        rev_map := Int_map.add !n p_str !rev_map;
-        if !pbc then
-            Pred("", Terms[Var ("x" ^ string_of_int !n)]) 
-        else 
-            Pred ("", Terms[Const !n]) )
+        let n_str = string_of_int !n in
+        let sub = (if !pbc then "x" ^ n_str else n_str) in
+        map := String_map.add p_str sub !map;
+        rev_map := String_map.add sub p_str !rev_map;
+        Pred ("", Terms[Var sub]) )
     
 let rec sub_expr e = 
     match e with
