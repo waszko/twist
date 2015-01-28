@@ -12,8 +12,11 @@ let rec nnf_expr e =
     | Pred (s1,ts) -> Pred (s1, ts) (* RHS just e? Use _? (also below) *)
     | Card1 _ -> e
     | Card2 _ -> e
-    | Forall _ | Exists _ | Eq _ | True | False -> 
-        raise (Unexpected_expr_found (e, "Cnf.nnf_expr"))
+ (* | Forall _ | Exists _ | Eq _ | True | False -> 
+        raise (Unexpected_expr_found (e, "Cnf.nnf_expr")) *)
+    | Forall (ts, s1, e1) -> Forall (ts, s1, nnf_expr e1)
+    | Exists (ts, s1, e1) -> Exists (ts, s1, nnf_expr e1)
+    | _ -> e
 
 (* distributes ORs inwards over ANDs, e.g: p|(q&r) -> (p|q)&(p|r) *)
 let rec dist_expr e =
@@ -32,8 +35,11 @@ let rec dist_expr e =
     | Pred (s1,ts) -> Pred (s1, ts) (* RHS just e? Use _? *)
     | Card1 _ -> e
     | Card2 _ -> e
-    | Forall _ | Exists _ | Eq _ | True | False -> 
-        raise (Unexpected_expr_found (e, "Cnf.dist_expr"))
+ (* | Forall _ | Exists _ | Eq _ | True | False -> 
+        raise (Unexpected_expr_found (e, "Cnf.dist_expr")) *)
+    | Forall (ts, s1, e1) -> Forall (ts, s1, dist_expr e1)
+    | Exists (ts, s1, e1) -> Exists (ts, s1, dist_expr e1)
+    | _ -> e
 
 (* tests equality of predicates to convert a=b into {t,f}, and then 
  * distributes these to reduce ANDs and ORs *) 

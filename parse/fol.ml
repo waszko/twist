@@ -4,6 +4,7 @@ let instance_file = ref ""
 let anon_args = ref 0
 let verbose = ref false
 let pbc = ref false
+let cnf_pass = ref false
 let sat_solver = ref "../sat_solvers/minisat/minisat" 
 let cnf_file = ref "out.cnf"
 let pbc_file = ref "out.pbc"
@@ -21,6 +22,7 @@ let set_anon_arg file =
 let option_spec = [
      ("-v", Arg.Set verbose, "enable verbose output"); 
      ("-p", Arg.Set pbc, "enable pseudo-boolean constraints"); 
+     ("-x", Arg.Set cnf_pass, "enable additional pass of cnf conversion"); 
      ("-s", Arg.String (set_file sat_solver), 
          "specify SAT-solver location (default=" ^ !sat_solver ^ ")"); 
      ("-c", Arg.String (set_file cnf_file), 
@@ -76,6 +78,11 @@ let _ =
     let parsed_problem = Parse.main Lex.token lexbuf in
     close_in problem;
     print_verbose ( Expr.string_of_expr parsed_problem ^ "\n\n" ); 
+    let parsed_problem = if !cnf_pass then ( (* does this act help? *)
+        time_section "Initial CNF pass...\n";
+        let cnf_problem = Cnf.cnf_expr parsed_problem in
+        print_verbose ( Expr.string_of_expr cnf_problem ^ "\n\n" ); 
+        cnf_problem) else parsed_problem in
     time_section "Parsing instance...\n";
     let instance = Io.read_instance !instance_file in
     time_section "Expanding problem...\n";
