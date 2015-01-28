@@ -80,3 +80,47 @@ let rec eq_expr e =
 
 (* converts e into CNF *)
 let cnf_expr e = dist_expr ( nnf_expr (eq_expr e) )
+
+(* ---- TSEITIN METHOD ---- *)
+let n = ref 0 (* highest sub so far *)
+let cnf = ref True (* cnf expression built up with tseitin method *)
+
+(* Tseitin transform for converting to CNF in linear time *)
+(* creates many more variables, resulting in much slower SAT-solving *)
+let rec tseitin_expr e =
+    match e with
+    | And (e1, e2) ->
+        let l1 = tseitin_expr e1 in (* must be a literal (l) *)
+        let l2 = tseitin_expr e2 in
+        n := !n + 1; (* need to add l3 to pred map *)
+        let l3 = Pred("",Terms[Var (string_of_int !n)]) in
+        (* (~l1 | ~l2 | l3) & (l1 | ~l3) & (l2 | ~l3) *)
+        cnf := And(!cnf, And(Or(Or(Not l1, Not l2), l3),
+                   And(Or(l1, Not l3), Or(l2, Not l3))) );
+        l3
+    | Or (e1, e2) ->
+        let l1 = tseitin_expr e1 in
+        let l2 = tseitin_expr e2 in
+        n := !n + 1;
+        let l3 = Pred("",Terms [Var (string_of_int !n)]) in 
+        (* (l1 | l2 | ~l3) & (~l1 | l3) & (~l2 | l3) *)
+        cnf := And(!cnf, 
+            And(Or(Or(l1,l2),Not l3),And(Or(Not l1,l3),Or(Not l2,l3))) );
+        l3
+    | Not l1 -> (* must be a predicate *)
+        n := !n + 1;
+        let l2 = Pred("",Terms[Var (string_of_int !n)]) in 
+        (* (~l1 | ~l2) & (l1 | l2) *)
+        cnf := And(!cnf, And(Or(Not l1, Not l2), Or(l1, l2)) ); 
+        l2
+    | Pred (s1,ts) -> Pred (s1,ts)
+    | Card1 _ -> e (* ? *)
+    | Card2 _ -> e
+    | Forall _ | Exists _ | Eq _ | True | False -> 
+        raise (Unexpected_expr_found (e, "Cnf.dist_expr")) 
+
+let tseitin_cnf_expr e nbvars = 
+    n := nbvars + 1;
+    cnf := Pred("",Terms [Var (string_of_int !n)]); (* blank var? *)
+    let p0 = tseitin_expr ( nnf_expr (eq_expr e) ) in
+    (And (!cnf, p0),!n)

@@ -5,6 +5,7 @@ let anon_args = ref 0
 let verbose = ref false
 let pbc = ref false
 let cnf_pass = ref false
+let tseitin = ref false
 let sat_solver = ref "../sat_solvers/minisat/minisat" 
 let cnf_file = ref "out.cnf"
 let pbc_file = ref "out.pbc"
@@ -23,6 +24,7 @@ let option_spec = [
      ("-v", Arg.Set verbose, "enable verbose output"); 
      ("-p", Arg.Set pbc, "enable pseudo-boolean constraints"); 
      ("-x", Arg.Set cnf_pass, "enable additional pass of cnf conversion"); 
+     ("-t", Arg.Set tseitin, "use Tseitin method to convert to cnf"); 
      ("-s", Arg.String (set_file sat_solver), 
          "specify SAT-solver location (default=" ^ !sat_solver ^ ")"); 
      ("-c", Arg.String (set_file cnf_file), 
@@ -91,7 +93,8 @@ let _ =
     time_section "Substituting predicates...\n";
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded !pbc in
     time_section "Converting to CNF...\n";
-    let cnf = Cnf.cnf_expr subbed in
+    let (cnf, nbvars) = if !tseitin then Cnf.tseitin_cnf_expr subbed nbvars
+                        else (Cnf.cnf_expr subbed, nbvars) in 
     print_verbose ( Expr.string_of_expr cnf ^ "\n\n" );   
     flush stdout; (* ? *)
 	if !pbc then ( (* do t's work in this 'if then else' block? *)
