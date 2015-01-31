@@ -54,8 +54,8 @@ let call_minisat _ =
     print_newline();
     flush stdout
     
-(* print_string only if verbose enabled *)
-let print_verbose str = if !verbose then print_string str
+(* print_string used for verbose output *)
+let pv str = print_string (str ^ "\n\n")
 
 exception Naively_unsat 
 
@@ -79,25 +79,24 @@ let _ =
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
     let parsed_problem = Parse.main Lex.token lexbuf in
     close_in problem;
-    print_verbose ( Expr.string_of_expr parsed_problem ^ "\n\n" ); 
+    if !verbose then pv (Expr.string_of_expr parsed_problem); 
     let parsed_problem = if !cnf_pass then ( (* does this act help? *)
         time_section "Initial CNF pass...\n";
         let cnf_problem = Cnf.cnf_expr parsed_problem in
-        print_verbose ( Expr.string_of_expr cnf_problem ^ "\n\n" ); 
+        if !verbose then pv (Expr.string_of_expr cnf_problem); 
         cnf_problem) else parsed_problem in
     time_section "Parsing instance...\n";
     let instance = Io.read_instance !instance_file in
     time_section "Expanding problem...\n";
     let expanded = Expand.expand_expr parsed_problem instance in
-    print_verbose ( Expr.string_of_expr expanded ^ "\n\n" );    
+    if !verbose then pv (Expr.string_of_expr expanded);    
     time_section "Substituting predicates...\n";
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded !pbc in
     time_section "Converting to CNF...\n";
     let (cnf, nbvars) = if !tseitin then Cnf.tseitin_cnf_expr subbed nbvars
                         else (Cnf.cnf_expr subbed, nbvars) in 
-    print_verbose ( Expr.string_of_expr cnf ^ "\n\n" );   
-    flush stdout; (* ? *)
-	if !pbc then ( (* do t's work in this 'if then else' block? *)
+    if !verbose then pv (Expr.string_of_expr cnf);   
+	if !pbc then ( 
         time_section "Converting to PBC...\n";
         let pbc = Pbc.pbc_of_expr_call cnf nbvars in
         Io.write_cnf pbc !pbc_file;
