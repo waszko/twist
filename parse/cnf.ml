@@ -84,6 +84,13 @@ let cnf_expr e = dist_expr ( nnf_expr (eq_expr e) )
 (* ---- TSEITIN METHOD ---- *)
 let n = ref 0 (* highest sub so far *)
 let cnf = ref True (* cnf expression built up with tseitin method *)
+let left = ref true (* branch to add new clauses on to *)
+
+(* extends cnf with new clauses, adding to alternate branches to reduce
+ * the depth of the tree *)
+let add_clauses c =
+    if !left then ( left := false; cnf := And (c, !cnf) )
+             else ( left := true; cnf := And (!cnf, c) )
 
 (* Tseitin transform for converting to CNF in linear time *)
 (* creates many more variables, resulting in much slower SAT-solving *)
@@ -95,8 +102,8 @@ let rec tseitin_expr e =
         n := !n + 1; (* need to add l3 to pred map *)
         let l3 = Pred("",Terms[Var (string_of_int !n)]) in
         (* (~l1 | ~l2 | l3) & (l1 | ~l3) & (l2 | ~l3) *)
-        cnf := And(!cnf, And(Or(Or(Not l1, Not l2), l3),
-                   And(Or(l1, Not l3), Or(l2, Not l3))) );
+        add_clauses (And(Or(Or(Not l1, Not l2), l3),
+                     And(Or(l1, Not l3), Or(l2, Not l3))) );
         l3
     | Or (e1, e2) ->
         let l1 = tseitin_expr e1 in
@@ -104,14 +111,14 @@ let rec tseitin_expr e =
         n := !n + 1;
         let l3 = Pred("",Terms [Var (string_of_int !n)]) in 
         (* (l1 | l2 | ~l3) & (~l1 | l3) & (~l2 | l3) *)
-        cnf := And(!cnf, 
-            And(Or(Or(l1,l2),Not l3),And(Or(Not l1,l3),Or(Not l2,l3))) );
+        add_clauses 
+            (And(Or(Or(l1,l2),Not l3),And(Or(Not l1,l3),Or(Not l2,l3))) );
         l3
     | Not l1 -> (* must be a predicate *)
         n := !n + 1;
         let l2 = Pred("",Terms[Var (string_of_int !n)]) in 
         (* (~l1 | ~l2) & (l1 | l2) *)
-        cnf := And(!cnf, And(Or(Not l1, Not l2), Or(l1, l2)) ); 
+        add_clauses ( And(Or(Not l1, Not l2), Or(l1, l2)) ); 
         l2
     | Pred (s1,ts) -> Pred (s1,ts)
     | Card1 _ -> e (* ? *)
