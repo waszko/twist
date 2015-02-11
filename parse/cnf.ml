@@ -85,6 +85,8 @@ let cnf_expr e = dist_expr ( nnf_expr (eq_expr e) )
 let n = ref 0 (* highest sub so far *)
 let cnf = ref True (* cnf expression built up with tseitin method *)
 let left = ref true (* branch to add new clauses on to *)
+let pbc = ref false (* are pbc being used? *)
+let rev_map = ref Sub.String_map.empty (* map of subs to preds from Sub *)
 
 (* extends cnf with new clauses, adding to alternate branches to reduce
  * the depth of the tree *)
@@ -92,42 +94,51 @@ let add_clauses c =
     if !left then ( left := false; cnf := And (c, !cnf) )
              else ( left := true; cnf := And (!cnf, c) )
 
+(* generate a new variable to use as the result of a Tseitin operation *)
+let gen_variable _ =
+    n := !n + 1;
+    let n_str = string_of_int !n in
+    let v = Pred("", Terms[Var (n_str)] ) in 
+    (* add to reverse predicate map with blank value: *)
+    let sub = (if !pbc then "x" ^ n_str else n_str) in
+    rev_map := Sub.String_map.add sub "" !rev_map;
+    v
+
 (* Tseitin transform for converting to CNF in linear time *)
-(* creates many more variables, resulting in much slower SAT-solving *)
+(* creates many more variables, possibly resulting in slower SAT-solving *)
 let rec tseitin_expr e =
     match e with
     | And (e1, e2) ->
-        let l1 = tseitin_expr e1 in (* must be a literal (l) *)
-        let l2 = tseitin_expr e2 in
-        n := !n + 1; (* need to add l3 to pred map *)
-        let l3 = Pred("",Terms[Var (string_of_int !n)]) in
-        (* (~l1 | ~l2 | l3) & (l1 | ~l3) & (l2 | ~l3) *)
-        add_clauses (And(Or(Or(Not l1, Not l2), l3),
-                     And(Or(l1, Not l3), Or(l2, Not l3))) );
-        l3
+        let v1 = tseitin_expr e1 in (* must be a variable (v) *)
+        let v2 = tseitin_expr e2 in
+        let v3 = gen_variable () in
+        (* (~v1 | ~v2 | v3) & (v1 | ~v3) & (v2 | ~v3) *)
+        add_clauses (And(Or(Or(Not v1, Not v2), v3),
+                     And(Or(v1, Not v3), Or(v2, Not v3))) );
+        v3
     | Or (e1, e2) ->
-        let l1 = tseitin_expr e1 in
-        let l2 = tseitin_expr e2 in
-        n := !n + 1;
-        let l3 = Pred("",Terms [Var (string_of_int !n)]) in 
-        (* (l1 | l2 | ~l3) & (~l1 | l3) & (~l2 | l3) *)
+        let v1 = tseitin_expr e1 in
+        let v2 = tseitin_expr e2 in
+        let v3 = gen_variable () in
+        (* (v1 | v2 | ~v3) & (~v1 | v3) & (~v2 | v3) *)
         add_clauses 
-            (And(Or(Or(l1,l2),Not l3),And(Or(Not l1,l3),Or(Not l2,l3))) );
-        l3
-    | Not l1 -> (* must be a predicate *)
-        n := !n + 1;
-        let l2 = Pred("",Terms[Var (string_of_int !n)]) in 
-        (* (~l1 | ~l2) & (l1 | l2) *)
-        add_clauses ( And(Or(Not l1, Not l2), Or(l1, l2)) ); 
-        l2
+            (And(Or(Or(v1,v2),Not v3),And(Or(Not v1,v3),Or(Not v2,v3))) );
+        v3
+    | Not v1 -> (* must be a predicate *)
+        let v2 = gen_variable () in
+        (* (~v1 | ~v2) & (v1 | v2) *)
+        add_clauses ( And(Or(Not v1, Not v2), Or(v1, v2)) ); 
+        v2
     | Pred (s1,ts) -> Pred (s1,ts)
     | Card1 _ -> e (* ? *)
     | Card2 _ -> e
     | Forall _ | Exists _ | Eq _ | True | False -> 
         raise (Unexpected_expr_found (e, "Cnf.dist_expr")) 
 
-let tseitin_cnf_expr e nbvars = 
-    n := nbvars + 1;
-    cnf := Pred("",Terms [Var (string_of_int !n)]); (* blank var? *)
+let tseitin_cnf_expr e nbvars prev_rev_map pbc_value = 
+    rev_map := prev_rev_map;
+    pbc := pbc_value;
+    n := nbvars;
+    cnf := gen_variable (); (* begin with blank var? *)
     let p0 = tseitin_expr ( nnf_expr (eq_expr e) ) in
-    (And (!cnf, p0),!n)
+    (And (!cnf, p0), !n, !rev_map)

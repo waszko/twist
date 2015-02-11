@@ -53,9 +53,10 @@ let rec get_pos_preds sub_list map str =
     | hd::tl -> (* if preds are false, they are preceded by a '-' *)
           if !skip_last && tl = [] then get_pos_preds [] map str else 
           let neg = (hd.[0] = '-') in
-          if neg then get_pos_preds tl map str
-          else get_pos_preds tl map (str ^ " " ^ 
-              (Sub.String_map.find hd map) )
+          let pred = if neg then "" else Sub.String_map.find hd map in
+          (* space valid predicates (e.g. not tseitin ones): *)
+          let pred = if not (pred = "") then " " ^ pred else pred in
+          get_pos_preds tl map (str ^ pred )
 
 (* read output of sat-solver to find satisfying assignment (or not) *)
 let output_answer pred_map file_name trailing_0 =

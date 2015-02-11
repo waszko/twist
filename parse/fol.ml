@@ -93,8 +93,9 @@ let _ =
     time_section "Substituting predicates...\n";
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded !pbc in
     time_section "Converting to CNF...\n";
-    let (cnf, nbvars) = if !tseitin then Cnf.tseitin_cnf_expr subbed nbvars
-                        else (Cnf.cnf_expr subbed, nbvars) in 
+    let (cnf, nbvars, pred_map) = 
+        if !tseitin then Cnf.tseitin_cnf_expr subbed nbvars pred_map !pbc
+        else (Cnf.cnf_expr subbed, nbvars, pred_map) in 
     if !verbose then pv (Expr.string_of_expr cnf);   
 	if !pbc then ( 
         time_section "Converting to PBC...\n";
