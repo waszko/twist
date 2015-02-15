@@ -1,4 +1,18 @@
-open Expr;;
+open Expr
+open Expand
+
+(* subbed expr has Sub instead of Pred, and no T/F/Eq (removed by eq.ml) *)
+type expr_s =
+      And_s of expr_s * expr_s
+    | Or_s of expr_s * expr_s
+    | Not_s of expr_s
+    | Card_s of expr_s list * int
+    | Sub_s of string
+
+let string_of_pred_e (Pred_e (s1, ts)) =
+    s1 ^ "(" ^ string_of_terms ts ^ ")"
+
+(* BIT BELOW THIS STILL NOT USED *)
 
 let cmp_term t1 t2 =
     match t1 with
@@ -42,28 +56,25 @@ let pbc = ref false
 
 (* substitute pred p for var (possibly defining new substitution) *)
 let sub_pred p =
-    let p_str = string_of_expr p in
+    let p_str = string_of_pred_e p in
     if String_map.mem p_str !map then
         let sub = String_map.find p_str !map in
-        Pred ("", Terms[Var sub])
+        Sub_s sub 
     else (
         n := !n +1;
         let n_str = string_of_int !n in
         let sub = (if !pbc then "x" ^ n_str else n_str) in
         map := String_map.add p_str sub !map;
         rev_map := String_map.add sub p_str !rev_map;
-        Pred ("", Terms[Var sub]) )
+        Sub_s sub )
     
 let rec sub_expr e = 
     match e with
-    | And (e1, e2) -> And (sub_expr e1, sub_expr e2)
-    | Or (e1, e2) -> Or (sub_expr e1, sub_expr e2)
-    | Not e1 -> Not (sub_expr e1)
-    | Pred _ -> sub_pred e 
-    | Eq _ -> e
-    | Card2 (preds, k) -> Card2 (List.rev_map sub_pred preds, k)
-    | Forall _ | Exists _ | True | False | Card1 _ -> 
-        raise (Unexpected_expr_found (e, "Sub.sub_expr"))
+    | And_e (e1, e2) -> And_s (sub_expr e1, sub_expr e2)
+    | Or_e (e1, e2) -> Or_s (sub_expr e1, sub_expr e2)
+    | Not_e e1 -> Not_s (sub_expr e1)
+    | Pred_e _ -> sub_pred e 
+    | Card_e (preds, k) -> Card_s (List.rev_map sub_pred preds, k)
 
 let sub_expr_call e pbc_setting =
     pbc := pbc_setting;

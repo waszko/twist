@@ -1,4 +1,18 @@
-open Expr;;
+open Expr
+
+(* expanded expression - no quantifiers, true and false added (for eq.ml), 
+ * and Card now contains a list of predicates *)
+type expr_e =
+      And_e of expr_e * expr_e
+    | Or_e of expr_e * expr_e
+    | Not_e of expr_e
+    | Pred_e of string * terms
+    | Eq_e of term * term
+    | True_e
+    | False_e
+    | Card_e of expr_e list * int
+
+exception Unexpected_expr_found of (expr_e * string) (* ? *)
 
 (* expansion has been attempted on an empty set (return set name?) *)
 exception Set_empty 
@@ -14,14 +28,12 @@ let rec replace_terms a b ts =
 
 let rec replace_expr a b e =
     match e with
-    | And (e1, e2) -> And (replace_expr a b e1, replace_expr a b e2)
-    | Or (e1, e2) -> Or (replace_expr a b e1, replace_expr a b e2)
-    | Not e1 -> Not (replace_expr a b e1)
-    | Forall (ts, s1, e1) -> Forall (ts, s1, replace_expr a b e1)
-    | Exists (ts, s1, e1) -> Exists (ts, s1, replace_expr a b e1)
-    | Pred (s1, ts) -> Pred (s1, replace_terms a b ts)
-    | Eq (t1, t2) -> Eq (replace_term a b t1, replace_term a b t2)
-    | True | False | Card1 _ | Card2 _ -> 
+    | And_e (e1, e2) -> And_e (replace_expr a b e1, replace_expr a b e2)
+    | Or_e (e1, e2) -> Or_e (replace_expr a b e1, replace_expr a b e2)
+    | Not_e e1 -> Not_e (replace_expr a b e1)
+    | Pred_e (s1, ts) -> Pred_e (s1, replace_terms a b ts)
+    | Eq_e (t1, t2) -> Eq_e (replace_term a b t1, replace_term a b t2)
+    | True_e | False_e | Card_e _ -> 
         raise (Unexpected_expr_found (e, "Expand.replace_expr"))
 
 (* matches each term with the respective item from within the element, 
@@ -41,14 +53,14 @@ let rec expand_forall ts set e =
     match set with 
     | [] -> raise Set_empty
     | hd :: [] -> match_expr ts hd e
-    | hd :: tl -> And (match_expr ts hd e , expand_forall ts tl e)
+    | hd :: tl -> And_e (match_expr ts hd e , expand_forall ts tl e)
     (* what can i do about the warning wanting a "[]" case? *)
 
 let rec expand_exists ts set e =
     match set with 
     | [] -> raise Set_empty 
     | hd :: [] -> match_expr ts hd e
-    | hd :: tl -> Or (match_expr ts hd e , expand_exists ts tl e)
+    | hd :: tl -> Or_e (match_expr ts hd e , expand_exists ts tl e)
 
 (* given a tuple of vars, generate a list of terms for each var in tuple *)
 let rec gen_terms vars terms =
@@ -62,7 +74,7 @@ let rec gen_preds p set preds =
     match set with 
     | [] -> preds
     | hd :: tl -> let terms = gen_terms hd [] in
-                  gen_preds p tl (Pred(p,terms)::preds) (*reorder cons?*)
+                  gen_preds p tl (Pred_e(p,terms)::preds) (*reorder cons?*)
 
 (* do i need to keep repeating this everywhere? *)
 module String_map = Map.Make (String);;
@@ -72,11 +84,11 @@ module String_map = Map.Make (String);;
 let rec expand_expr e sets_map = 
     match e with
     | And (e1, e2) -> 
-        And (expand_expr e1 sets_map, expand_expr e2 sets_map)
+        And_e (expand_expr e1 sets_map, expand_expr e2 sets_map)
     | Or (e1, e2) ->  
-        Or (expand_expr e1 sets_map, expand_expr e2 sets_map)
+        Or_e (expand_expr e1 sets_map, expand_expr e2 sets_map)
     | Not e1 -> 
-        Not (expand_expr e1 sets_map)
+        Not_e (expand_expr e1 sets_map)
     | Forall (Terms ts, s2, e1) -> 
         let set = String_map.find s2 sets_map in 
         expand_forall ts set (expand_expr e1 sets_map)
@@ -85,11 +97,12 @@ let rec expand_expr e sets_map =
         let set = String_map.find s2 sets_map in 
         expand_exists ts set (expand_expr e1 sets_map)
     | Eq (t1, t2) ->
-        Eq (t1, t2) (* =e *)
-    | Card1(p, s, k) ->
+        Eq_e (t1, t2) (* =e *)
+    | Card (p, s, k) ->
         let set = String_map.find s sets_map in
         let k = int_of_string ( (*should only be 1 k (an int) *)
             List.hd (List.hd (String_map.find k sets_map))) in
         let preds = gen_preds p set [] in
-        Card2(preds, k)
-    | _ -> e (* is it clearer to give last 2 cases explicitly? *) 
+        Card_e (preds, k)
+    | Pred (s, ts) -> 
+        Pred_e (s, ts)

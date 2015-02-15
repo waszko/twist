@@ -77,19 +77,22 @@ let _ =
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
     let parsed_problem = Parse.main Lex.token lexbuf in
     close_in problem;
-    if !verbose then pv (Expr.string_of_expr parsed_problem); 
+    (*if !verbose then pv (Expr.string_of_expr parsed_problem); *)
     time_section "Parsing instance...\n";
     let instance = Io.read_instance !instance_file in
     time_section "Expanding problem...\n";
     let expanded = Expand.expand_expr parsed_problem instance in
-    if !verbose then pv (Expr.string_of_expr expanded);    
+    (*if !verbose then pv (Expr.string_of_expr expanded);    *)
+    time_section "Evaluating =s...\n";
+    let eq = Eq.eq_expr expanded in
+    (*if !verbose then pv (Expr.string_of_expr eq);    *)
     time_section "Substituting predicates...\n";
-    let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded !pbc in
+    let (subbed, nbvars, pred_map) = Sub.sub_expr_call eq !pbc in
     time_section "Converting to CNF...\n";
     let (cnf, nbvars, pred_map) = 
         if !tseitin then Cnf.tseitin_cnf_expr subbed nbvars pred_map !pbc
         else (Cnf.cnf_expr subbed, nbvars, pred_map) in 
-    if !verbose then pv (Expr.string_of_expr cnf);   
+    (*if !verbose then pv (Expr.string_of_expr cnf);   *)
 	if !pbc then ( 
         time_section "Converting to PBC...\n";
         let pbc = Pbc.pbc_of_expr_call cnf nbvars in

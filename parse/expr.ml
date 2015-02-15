@@ -13,10 +13,7 @@ type expr =
     | Exists of terms * string * expr
     | Pred of string * terms
     | Eq of term * term
-    | True
-    | False
-    | Card1 of string * string * string
-    | Card2 of expr list * int
+    | Card of string * string * string
 
 (* when found an unexpected 'expr' in function 'string' *)
 exception Unexpected_expr_found of (expr * string)
@@ -58,8 +55,6 @@ let rec string_of_expr e =
         s1 ^ "(" ^ string_of_terms ts ^ ")"
     | Eq (t1, t2) ->
         string_of_term t1 ^ " = " ^ string_of_term t2
-    | True -> "true"
-    | False -> "false"
-    | Card1 (p, s, k) -> "(|" ^ p ^ " of " ^ s ^"| = " ^ k ^ ")"
-    | Card2 (ps, k) -> 
-        "([" ^ string_of_pred_list ps ^ "] = " ^ string_of_int k ^")"
+    | Card (p, s, k) -> "(|" ^ p ^ " of " ^ s ^"| = " ^ k ^ ")"
+    (*| Card2 (ps, k) -> 
+        "([" ^ string_of_pred_list ps ^ "] = " ^ string_of_int k ^")"*)

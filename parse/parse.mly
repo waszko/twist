@@ -29,9 +29,11 @@ sentence:
     | NOT sentence                           {Not($2)}
     | sentence IMPLIES sentence              {Or(Not($1),$3)}
     | LPAREN sentence RPAREN                 {$2}
-    | FORALL term_list IN UCHAR sentence {Forall(Terms(List.rev $2),$4,$5)}
-    | EXISTS term_list IN UCHAR sentence {Exists(Terms(List.rev $2),$4,$5)}
-    | OR UCHAR OF UCHAR OR EQUALS UCHAR      {Card1($2,$4,$7)}
+    | FORALL term_list IN UCHAR sentence     {Forall(Terms(List.rev $2),
+                                              $4,$5)}
+    | EXISTS term_list IN UCHAR sentence     {Exists(Terms(List.rev $2),
+                                              $4,$5)}
+    | OR UCHAR OF UCHAR OR EQUALS UCHAR      {Card($2,$4,$7)}
 ;
 
 atomic_sentence:
