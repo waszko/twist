@@ -2,19 +2,7 @@ open Sub
 
 let num_clauses = ref 1
 
-(*
-let dimacs_of_term t buff =
-    match t with
-    | Var v -> Buffer.add_string buff v
-    | Const c -> Buffer.add_string buff (string_of_int c)
-
-let rec dimacs_of_terms ts buff =
-    match ts with
-    | Terms [] -> () 
-    | Terms (t :: ts) ->
-        dimacs_of_term t buff;
-        dimacs_of_terms (Terms ts) buff
-*)
+exception Cardinality_constraint_found
 
 let rec dimacs_of_expr e buff = 
     match e with
@@ -32,7 +20,7 @@ let rec dimacs_of_expr e buff =
         dimacs_of_expr e1 buff
     | Sub_s s1 ->
         Buffer.add_string buff s1
-    (* Card_s *)
+    | Card_s _ -> raise Cardinality_constraint_found
 
 (* changed to use string buffer as is much faster than string concat *)
 let dimacs_of_expr_call e num_vars = 

@@ -35,7 +35,9 @@ let rec dist_expr e =
 (* converts e into CNF *)
 let cnf_expr e = dist_expr ( nnf_expr e )
 
+
 (* ---- TSEITIN METHOD ---- *)
+
 let n = ref 0 (* highest sub so far *)
 let cnf = ref (Sub_s "def") (* cnf expr built up with tseitin method *)
 let left = ref true (* branch to add new clauses on to *)

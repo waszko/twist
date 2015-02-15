@@ -14,6 +14,24 @@ type expr_e =
 
 exception Unexpected_expr_found of (expr_e * string) (* ? *)
 
+let rec string_of_expr_e e =
+    match e with
+    | And_e (e1, e2) ->
+        "(" ^ string_of_expr_e e1 ^ " & " ^ string_of_expr_e e2 ^ ")"
+    | Or_e  (e1, e2) ->
+        "(" ^ string_of_expr_e e1 ^ " | " ^ string_of_expr_e e2 ^ ")"
+    | Not_e e1 -> 
+        "~" ^ string_of_expr_e e1
+    | Pred_e (s1, ts) ->
+        s1 ^ "(" ^ string_of_terms ts ^ ")"
+    | Eq_e (t1, t2) ->
+        string_of_term t1 ^ " = " ^ string_of_term t2
+    | True_e -> "true"
+    | False_e -> "false"
+    | Card_e (ps, k) -> 
+        "([" ^ String.concat " " (List.map string_of_expr_e ps)
+             ^ "] = " ^ string_of_int k ^")"
+
 (* expansion has been attempted on an empty set (return set name?) *)
 exception Set_empty 
 
@@ -54,7 +72,6 @@ let rec expand_forall ts set e =
     | [] -> raise Set_empty
     | hd :: [] -> match_expr ts hd e
     | hd :: tl -> And_e (match_expr ts hd e , expand_forall ts tl e)
-    (* what can i do about the warning wanting a "[]" case? *)
 
 let rec expand_exists ts set e =
     match set with 

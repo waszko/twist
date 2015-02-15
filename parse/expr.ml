@@ -29,14 +29,6 @@ let rec string_of_terms ts =
     | Terms (hd :: tl) -> 
         string_of_term hd ^ " " ^ string_of_terms (Terms tl)
 
-let rec string_of_pred_list ps =
-    match ps with
-    | [] -> ""
-    | Pred (s1, ts) :: tl ->
-        s1 ^ "("  ^ string_of_terms ts ^ ") " ^ string_of_pred_list tl
-    | e :: tl -> 
-        raise (Unexpected_expr_found (e, "Expr.string_of_pred_list"))
-
 let rec string_of_expr e =
     match e with
     | And (e1, e2) ->
@@ -44,7 +36,7 @@ let rec string_of_expr e =
     | Or  (e1, e2) ->
         "(" ^ string_of_expr e1 ^ " | " ^ string_of_expr e2 ^ ")"
     | Not e1 -> 
-        "(" ^ " ~ " ^ string_of_expr e1 ^ ")"
+        "~" ^ string_of_expr e1 
     | Forall (ts, s1, e1) ->
         "forall " ^ string_of_terms ts ^ " in " 
         ^ s1 ^ "(" ^ string_of_expr e1 ^ ")"
@@ -56,5 +48,3 @@ let rec string_of_expr e =
     | Eq (t1, t2) ->
         string_of_term t1 ^ " = " ^ string_of_term t2
     | Card (p, s, k) -> "(|" ^ p ^ " of " ^ s ^"| = " ^ k ^ ")"
-    (*| Card2 (ps, k) -> 
-        "([" ^ string_of_pred_list ps ^ "] = " ^ string_of_int k ^")"*)
