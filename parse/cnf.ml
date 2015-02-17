@@ -54,9 +54,9 @@ let add_clauses c =
 let gen_variable _ =
     n := !n + 1;
     let n_str = string_of_int !n in
-    let v = Sub_s n_str in 
-    (* add to reverse predicate map with blank value: *)
     let sub = (if !pbc then "x" ^ n_str else n_str) in
+    let v = Sub_s sub in 
+    (* add to reverse predicate map with blank value: *)
     rev_map := Sub.String_map.add sub "" !rev_map;
     v
 

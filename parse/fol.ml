@@ -39,7 +39,7 @@ let usage_msg = "Usage: fol.byte|native [options] [<problem file>] \
 let _ = Arg.parse option_spec set_anon_arg usage_msg
 
 let time_section section_label = 
-    let current_time = Sys.time() in
+    let current_time = Unix.gettimeofday() in
     Printf.printf "Time taken: %fs\n\n" (current_time -. !time);
     Printf.printf section_label;
     flush stdout; (* ? *)
@@ -71,7 +71,8 @@ let call_minisat_plus _ =
 let _ =
   try
     assert (!anon_args >= 2); (* give better output for this *)
-    time := Sys.time();
+    time := Unix.gettimeofday();
+    let start_time = !time in
     Printf.printf "Parsing problem...\n";
     let problem = open_in !problem_file in
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
@@ -108,7 +109,7 @@ let _ =
         call_minisat (); );
     time_section "Replacing predicates...\n";
     Io.output_answer pred_map !answer_file (not !pbc);
-    Printf.printf "Total running time: %fs\n\n" !time;
+    Printf.printf "Total running time: %fs\n\n" (!time -. start_time);
     flush stdout
   with Expr.Unexpected_expr_found (expr, str) ->
     print_string( "\n" ^ Expr.string_of_expr expr ^ " found in " ^ str ^ "\n")
