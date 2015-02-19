@@ -89,5 +89,9 @@ let rec sub_expr e =
 
 let sub_expr_call e pbc_setting =
     pbc := pbc_setting;
+    (* refresh these for when testing: *)
+    n := 0;
+    map := String_map.empty;
+    rev_map := String_map.empty;
     let exp = sub_expr e in (* is this bad? *)
     (exp, !n, !rev_map)
