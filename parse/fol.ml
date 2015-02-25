@@ -61,7 +61,7 @@ exception Naively_unsat
 let call_minisat_plus _ =
     let cmd = "../sat_solvers/minisat+/minisat+ " (* make arg *)
               ^ !pbc_file ^ " -v0 | cut -c 3- > " ^ !answer_file in
-              (* ^ cut as minisat adds 2 unwanted chars *)
+              (* ^ cut as minisat adds 2 unwanted chars (hacky) *)
     let exit_code = Sys.command cmd in
     print_string("Minisat+ exit code: " ^ string_of_int (exit_code));
     print_newline();

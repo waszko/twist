@@ -59,18 +59,21 @@ let rec get_pos_preds sub_list map str =
           get_pos_preds tl map (str ^ pred )
 
 (* read output of sat-solver to find satisfying assignment (or not) *)
+let answer = ref false
 let output_answer pred_map file_name trailing_0 =
     skip_last := trailing_0; (* answer file has a trailing 0 predicate *)
     let ic = open_in file_name in
     try 
         let line = input_line ic in
         if (line = "SAT" || line = "SATISFIABLE") then (
+            answer := true;
             let line2 = input_line ic in
             let vars = Str.split (Str.regexp " ") line2 in
             (* map back to predicates *)
             let preds = get_pos_preds vars pred_map "" in
             print_string ("Satisfying assignment:" ^ preds ^ "\n") )
         else if (line = "UNSAT" || line = "UNSATISFIABLE") then (
+            answer := false;
             print_string "No satisfying assignment exists\n"; )
         else (
             raise (File_format_error file_name) );

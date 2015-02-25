@@ -40,10 +40,12 @@ let read_graph file_name k =
   (* let cliques = BK.maximalcliques g in *)
   try 
       C.coloring g k;
-      print_string "coloured!\n"
+      print_string "coloured!\n";
+      true
   with 
   | _ -> (*Coloring.Mark(G).NoColoring *)
-      print_string ("cannot be " ^ string_of_int k ^ " coloured.\n")
+      print_string ("cannot be " ^ string_of_int k ^ " coloured.\n");
+      false
 
 (*let () = 
   let file_name = Sys.argv.(1) in

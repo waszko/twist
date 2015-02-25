@@ -86,7 +86,9 @@ let rec tseitin_expr e =
         add_clauses ( And_s(Or_s(Not_s v1, Not_s v2), Or_s(v1, v2)) ); 
         v2
     | Sub_s s1 -> Sub_s s1
-    | Card_s _ -> e (* ? *)
+    | Card_s _ -> 
+        add_clauses e; (* treat card constraint as a clause *)
+        gen_variable () (* return unused variable *)
 
 let tseitin_cnf_expr e nbvars prev_rev_map pbc_value = 
     rev_map := prev_rev_map;
