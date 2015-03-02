@@ -60,40 +60,47 @@ let gen_variable _ =
     rev_map := Sub.String_map.add sub "" !rev_map;
     v
 
+(* if arg is a predicate returns it, else gens a new var *)
+let get_variable e =
+    match e with
+    | Sub_s s1 -> Sub_s s1
+    | _ -> gen_variable () 
+
 (* Tseitin transform for converting to CNF in linear time *)
 (* creates many more variables, possibly resulting in slower SAT-solving *)
-let rec tseitin_expr e =
+
+let rec tseitin_expr e v3 = (* v3 = result of gate var, passed down *)
     match e with
     | And_s (e1, e2) ->
-        let v1 = tseitin_expr e1 in (* must be a variable (v) *)
-        let v2 = tseitin_expr e2 in
-        let v3 = gen_variable () in
+        let v1 = get_variable e1 in
+        let v2 = get_variable e2 in
         (* (~v1 | ~v2 | v3) & (v1 | ~v3) & (v2 | ~v3) *)
         add_clauses (And_s(Or_s(Or_s(Not_s v1, Not_s v2), v3),
                      And_s(Or_s(v1, Not_s v3), Or_s(v2, Not_s v3))) );
-        v3
+        tseitin_expr e1 v1;
+        tseitin_expr e2 v2
     | Or_s (e1, e2) ->
-        let v1 = tseitin_expr e1 in
-        let v2 = tseitin_expr e2 in
-        let v3 = gen_variable () in
+        let v1 = get_variable e1 in
+        let v2 = get_variable e2 in
         (* (v1 | v2 | ~v3) & (~v1 | v3) & (~v2 | v3) *)
         add_clauses (And_s(Or_s(Or_s(v1,v2),Not_s v3),
                      And_s(Or_s(Not_s v1,v3),Or_s(Not_s v2,v3))) );
-        v3
+        tseitin_expr e1 v1;
+        tseitin_expr e2 v2
     | Not_s v1 -> (* must be a predicate *)
-        let v2 = gen_variable () in
+        let v2 = v3 in
         (* (~v1 | ~v2) & (v1 | v2) *)
-        add_clauses ( And_s(Or_s(Not_s v1, Not_s v2), Or_s(v1, v2)) ); 
-        v2
-    | Sub_s s1 -> Sub_s s1
+        add_clauses ( And_s(Or_s(Not_s v1, Not_s v2), Or_s(v1, v2)) )
+    | Sub_s s1 -> ()
     | Card_s _ -> 
-        add_clauses e; (* treat card constraint as a clause *)
-        gen_variable () (* return unused variable *)
+        add_clauses e (* treat card constraint as a clause *)
+        (* does this work? add_clauses And(e, v3) ? *)
 
 let tseitin_cnf_expr e nbvars prev_rev_map pbc_value = 
     rev_map := prev_rev_map;
     pbc := pbc_value;
     n := nbvars;
-    cnf := gen_variable (); (* begin with blank var? *)
-    let p0 = tseitin_expr ( nnf_expr e ) in
-    (And_s (!cnf, p0), !n, !rev_map)
+    let result_var = gen_variable () in
+    cnf := result_var;
+    tseitin_expr ( nnf_expr e) result_var;
+    (!cnf, !n, !rev_map)
