@@ -3,13 +3,17 @@ open Read_graph
 open Test_fol
 
 let nb_graphs = 200
-let v_min = 10
-let v_max = 100
+let v_min = 1
+let v_max = 50
 let dir = "test/test_graphs/"
 let sec_limit = 60
 let k = 3
-let problem_file = "problems/" ^ string_of_int k ^ "col.txt"
+let repeat = 1
+let pbc = true
+(*let problem_file = "problems/" ^ string_of_int k ^ "col.txt"*)
+let problem_file = "problems/pbclique.txt"
 let results_file = "test/results/" 
+                   ^ "clique_" 
                    ^ "k-" ^ string_of_int k 
                    ^ "_vmin-" ^  string_of_int v_min 
                    ^ "_vmax-" ^ string_of_int v_max 
@@ -93,17 +97,19 @@ let () =
         print_string (v_str ^ " " ^ e_str ^ "\n" );
         flush stdout;
         let graph_file_name = (dir ^ v_str ^ "_" ^ e_str ^ ".graph") in
-        gen_graph v e graph_file_name;
-        let t1 = Unix.gettimeofday() in
-        let result1 = timeout read_graph (graph_file_name, k) sec_limit 
+        for j=1 to repeat do
+            gen_graph v e k graph_file_name;
+            let t1 = Unix.gettimeofday() in
+            let result1 = timeout read_graph (graph_file_name, k) sec_limit 
                      false in
-        let t2 = Unix.gettimeofday() in
-        fol problem_file graph_file_name;
-        let result2 = !Io.answer in 
-        if result1 != result2 then raise Different_answers;
-        let t3 = Unix.gettimeofday() in
-        let (nbv1,nbc1,nbv2,nbc2) = call_satelite "out.cnf" "red.cnf" in
-        print_times 
-            (v, e, (t2-.t1), (t3-.t2), result1, nbv1, nbc1, nbv2, nbc2)
+            let t2 = Unix.gettimeofday() in
+            fol problem_file graph_file_name pbc;
+            let result2 = !Io.answer in 
+            if result1 != result2 then raise Different_answers;
+            let t3 = Unix.gettimeofday() in
+            let (nbv1,nbc1,nbv2,nbc2) = call_satelite "out.cnf" "red.cnf" in
+            print_times 
+                (v, e, (t2-.t1), (t3-.t2), result1, nbv1, nbc1, nbv2, nbc2)
+        done;
     done;
 

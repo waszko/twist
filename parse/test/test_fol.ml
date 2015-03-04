@@ -43,29 +43,35 @@ let call_minisat_plus _ =
     flush stdout;
     if exit_code = 20 then raise Naively_unsat 
 
-let fol p_f i_f = 
+let fol p_f i_f pbc_val = 
   problem_file := p_f;
   instance_file := i_f;
+  pbc := pbc_val;
   (*try*)
-    time := Sys.time();
+    time := Unix.gettimeofday();
+    let start_time = !time in
     Printf.printf "Parsing problem...\n";
     let problem = open_in !problem_file in
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
     let parsed_problem = Parse.main Lex.token lexbuf in
     close_in problem;
-    (*if !verbose then pv (Expr.string_of_expr parsed_problem); *)
+    if !verbose then pv (Expr.string_of_expr parsed_problem); 
     time_section "Parsing instance...\n";
     let instance = Io.read_instance !instance_file in
     time_section "Expanding problem...\n";
     let expanded = Expand.expand_expr parsed_problem instance in
-    (*if !verbose then pv (Expr.string_of_expr expanded);    *)
+    if !verbose then pv (Expand.string_of_expr_e expanded);    
+    time_section "Evaluating =s...\n";
+    let eq = Eq.eq_expr expanded in
+    if !verbose then pv (Expand.string_of_expr_e eq);    
     time_section "Substituting predicates...\n";
-    let (subbed, nbvars, pred_map) = Sub.sub_expr_call expanded !pbc in
+    let (subbed, nbvars, pred_map) = Sub.sub_expr_call eq !pbc in
+    if !verbose then pv (Sub.string_of_expr_s subbed);    
     time_section "Converting to CNF...\n";
     let (cnf, nbvars, pred_map) = 
         if !tseitin then Cnf.tseitin_cnf_expr subbed nbvars pred_map !pbc
         else (Cnf.cnf_expr subbed, nbvars, pred_map) in 
-    (*if !verbose then pv (Expr.string_of_expr cnf);   *)
+    if !verbose then pv (Sub.string_of_expr_s cnf);   
 	if !pbc then ( 
         time_section "Converting to PBC...\n";
         let pbc = Pbc.pbc_of_expr_call cnf nbvars in
@@ -80,7 +86,7 @@ let fol p_f i_f =
         call_minisat (); );
     time_section "Replacing predicates...\n";
     Io.output_answer pred_map !answer_file (not !pbc);
-    Printf.printf "Total running time: %fs\n\n" !time;
+    Printf.printf "Total running time: %fs\n\n" (!time -. start_time);
     flush stdout
  (* with Expr.Unexpected_expr_found (expr, str) ->
     print_string( "\n" ^ Expr.string_of_expr expr ^ " found in " ^ str ^ "\n") *)

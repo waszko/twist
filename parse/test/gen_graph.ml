@@ -22,12 +22,15 @@ let write_edges v1 v2 =
                              ^ string_of_int (v2+1) ^ "\n") :: !output
     (* ^ +1 needed as ocamlgraph uses node 0 *)
 
-let gen_graph v e output_file = 
+let write_k k = output := ("K " ^ string_of_int k ^ "\n") :: !output
+
+let gen_graph v e k output_file = 
   output := [];
   Random.self_init ();
   let g = R.graph  ~loops:false ~v ~e () in (* loops? *)
   G.iter_edges write_edges g;
   write_vertices v;
+  write_k k;
   let oc = open_out output_file in
   Printf.fprintf oc "%s" (String.concat "" !output);
   close_out oc
