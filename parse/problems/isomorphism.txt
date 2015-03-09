@@ -1,15 +1,14 @@
-(forall x in V (
-  forall y in W (
-    ~F(x y)
-    |  
-    F(x y)
-  )
-))
-&
+(* G1 = (V, E), G2 = (W, D) *)
+
+(* all vertices in G1 are related to some vertex in G2 *)
 (forall x in V ( exists y in W ( F(x y) ) ) )
+
 &
+(* all vertices in G2 are related to some vertex in G1 *)
 (forall y in W ( exists x in V ( F(x y) ) ) )
+
 &
+(* the relation F is a bijection between V and W *)
 (forall x in V (
   forall y in W (
     (forall p in V (
@@ -21,7 +20,10 @@
     ))
   )
 ))
+
 &
+(* if there is an edge (a,b) in G1, then there must be an edge
+   (F(a), F(b)) in G2 *)
 ((forall x y in E (
   exists a b in D (
     (F(x a) & F(y b))

@@ -1,6 +1,5 @@
 {
     open Parse 
-    exception Eof (* ? *)
 }
 
 rule token = parse
@@ -20,5 +19,11 @@ rule token = parse
     | '('                  { LPAREN }
     | ')'                  { RPAREN }
     | ';'                  { SEMICOLON }
-    | eof                  { EOF } (* was raise Eof *)
+    | "(*"                 { comment lexbuf } (* start of comment *)
+    | eof                  { EOF }
+
+(* does not allow nested comments *)
+and comment = parse
+    | "*)"                 { token lexbuf } (* end of comment *)
+    | _                    { comment lexbuf }
 

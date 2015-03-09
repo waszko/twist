@@ -1,3 +1,8 @@
+(* there is at least one vertex in the disconnected set S *)
 (exists x in V ( S(x))) &
+
+(* there is at least one vertex not in the disconnected set S *)
 (exists y in V (~S(y))) &
+
+(* all edges are either between nodes both in S, or both not in S *) 
 (forall w z in E ( (S(w) & S(z)) | (~S(w) & ~S(z)) ))

@@ -1,7 +1,9 @@
+(* all vertices in the clique must be connected by an edge *)
 (forall x in V (
   forall y in V ( x=y |
     ((C(x) & C(y)) -> (exists a b in E ( ((x=a)&(y=b)) | ((x=b)&(y=a)) ))) 
   )
 ) )
 &
+(* the size of the clique is equal to the input parameter K *)
 ( |C of V| = K )

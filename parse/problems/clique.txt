@@ -1,9 +1,13 @@
+(* if F relates a vertex x of the graph to an element of y of the set U 
+   (of size of our clique), then x is in the clique *)
 (forall x in V (
   forall y in U (
     F(x y) -> C(x)
   )
 ) )
 &
+(* the next to conjuncts ensure that F is a 1-to-1 correspondence between 
+   C (the clique) and set U *)
 (forall x in V (
   C(x) -> exists y in U ( (F(x y) ) & 
 	          (forall z in U ( F(x z) -> y=z ) )
@@ -14,6 +18,7 @@
              (forall z in V ( (F(z y) & C(z)) -> x=z ) )
 ) ) )
 &
+(* all vertices in the clique must be connected by an edge *)
 (forall x in V (
   forall y in V ( x=y |
     ((C(x) & C(y)) -> (exists a b in E ( ((x=a)&(y=b)) | ((x=b)&(y=a)) ))) 

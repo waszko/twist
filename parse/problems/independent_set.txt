@@ -1,7 +1,8 @@
-(forall v in V ( I(v) | ~I(v) ) )
-&
+(* if nodes a and b are both in the independent set I, then they must not
+   be connected by any edge *) 
 (forall a in V ( forall b in V (
   (I(a) & I(b)) -> ~(exists x y in E (((x=a) & (y=b)) | ((x=b) & (y=a))) )
 )))
 &
+(* the size of the independent set is K *)
 (|I of V| = K)

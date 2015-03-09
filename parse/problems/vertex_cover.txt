@@ -1,5 +1,5 @@
-(forall v in V ( C(v) | ~C(v) ) )
-&
+(* at least one endpoint of every edge is in the cover *)
 (forall x y in E ( C(x) | C(y) ) )
 &
+(* the size of the cover is K *)
 (|C of V| = K)
