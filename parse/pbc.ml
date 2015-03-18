@@ -34,9 +34,9 @@ let rec pbc_of_expr buff e =
         raise Not_in_nnf
     | Sub_s s1 ->
         Buffer.add_string buff ("+1*" ^ s1 ^ " ")
-    | Card_s (preds, k) -> 
+    | Card_s (preds, eq, k) -> 
         ignore (List.map (pbc_of_expr buff) preds); (*using side effects*)
-        Buffer.add_string buff ("= " ^ string_of_int k ^ ";\n");
+        Buffer.add_string buff (eq ^ " " ^ string_of_int k ^ ";\n");
         place_rhs := false
 
    (* do i need all these args for pbc? *)

@@ -7,7 +7,7 @@ type expr_s =
     | Or_s of expr_s * expr_s
     | Not_s of expr_s
     | Sub_s of string
-    | Card_s of expr_s list * int
+    | Card_s of expr_s list * string * int
 
 let rec string_of_expr_s e =
     match e with
@@ -17,9 +17,9 @@ let rec string_of_expr_s e =
         "(" ^ string_of_expr_s e1 ^ " | " ^ string_of_expr_s e2 ^ ")"
     | Not_s e1 ->  "~" ^ string_of_expr_s e1 
     | Sub_s s1 ->  s1 
-    | Card_s (ps, k) -> 
+    | Card_s (ps, eq, k) -> 
         "([" ^ String.concat " " (List.map string_of_expr_s ps)
-             ^ "] = " ^ string_of_int k ^ ")"
+             ^ "] " ^ eq ^ " " ^ string_of_int k ^ ")"
 
 (* BIT BELOW THIS STILL NOT USED *)
 
@@ -83,7 +83,7 @@ let rec sub_expr e =
     | Or_e (e1, e2) -> Or_s (sub_expr e1, sub_expr e2)
     | Not_e e1 -> Not_s (sub_expr e1)
     | Pred_e _ -> sub_pred e 
-    | Card_e (preds, k) -> Card_s (List.rev_map sub_pred preds, k)
+    | Card_e (preds, eq, k) -> Card_s (List.rev_map sub_pred preds, eq, k)
     | Eq_e _| True_e | False_e -> 
         raise (Unexpected_expr_found (e, "Sub.sub_expr"))
 

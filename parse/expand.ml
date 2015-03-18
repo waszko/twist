@@ -10,7 +10,7 @@ type expr_e =
     | Eq_e of term * term
     | True_e
     | False_e
-    | Card_e of expr_e list * int
+    | Card_e of expr_e list * string * int
 
 exception Unexpected_expr_found of (expr_e * string) (* ? *)
 
@@ -28,9 +28,9 @@ let rec string_of_expr_e e =
         string_of_term t1 ^ " = " ^ string_of_term t2
     | True_e -> "true"
     | False_e -> "false"
-    | Card_e (ps, k) -> 
+    | Card_e (ps, eq, k) -> 
         "([" ^ String.concat " " (List.map string_of_expr_e ps)
-             ^ "] = " ^ string_of_int k ^")"
+             ^ "] " ^ eq ^ " " ^ string_of_int k ^")"
 
 (* expansion has been attempted on an empty set (return set name?) *)
 exception Set_empty 
@@ -115,11 +115,11 @@ let rec expand_expr e sets_map =
         expand_exists ts set (expand_expr e1 sets_map)
     | Eq (t1, t2) ->
         Eq_e (t1, t2) (* =e *)
-    | Card (p, s, k) ->
+    | Card (p, s, eq, k) ->
         let set = String_map.find s sets_map in
         let k = int_of_string ( (*should only be 1 k (an int) *)
             List.hd (List.hd (String_map.find k sets_map))) in
         let preds = gen_preds p set [] in
-        Card_e (preds, k)
+        Card_e (preds, eq, k)
     | Pred (s, ts) -> 
         Pred_e (s, ts)

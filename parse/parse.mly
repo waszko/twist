@@ -5,7 +5,7 @@ open Expr (* contains expr type declarations *)
 %token <int> INT
 %token FORALL EXISTS IN OF
 %token <string> LCHAR UCHAR /* ? char ? */
-%token AND OR NOT IMPLIES EQUALS
+%token AND OR NOT IMPLIES EQUALS LEQ GEQ
 %token LPAREN RPAREN SEMICOLON EOF
 
 %right IMPLIES
@@ -33,7 +33,7 @@ sentence:
                                               $4,$5)}
     | EXISTS term_list IN UCHAR sentence     {Exists(Terms(List.rev $2),
                                               $4,$5)}
-    | OR UCHAR OF UCHAR OR EQUALS UCHAR      {Card($2,$4,$7)}
+    | OR UCHAR OF UCHAR OR eq UCHAR          {Card($2,$4,$6,$7)}
 ;
 
 atomic_sentence:
@@ -51,3 +51,8 @@ term_list:
       term_list term                         {$2::$1} /* list */
     | term                                   {[$1]}
 ;
+
+eq:
+      EQUALS                                 {"="} /* get from tokens? */
+    | LEQ                                    {"<="}
+    | GEQ                                    {">="}

@@ -16,6 +16,8 @@ rule token = parse
     | '~'                  { NOT }
     | "->"                 { IMPLIES }
     | '='                  { EQUALS }
+    | "<="                 { LEQ }
+    | ">="                 { GEQ }
     | '('                  { LPAREN }
     | ')'                  { RPAREN }
     | ';'                  { SEMICOLON }

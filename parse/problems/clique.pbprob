@@ -5,5 +5,5 @@
   )
 ) )
 &
-(* the size of the clique is equal to the input parameter K *)
-( |C of V| = K )
+(* the size of the clique is at least equal to the input parameter K *)
+( |C of V| >= K )
