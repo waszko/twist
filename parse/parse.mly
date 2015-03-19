@@ -3,10 +3,10 @@ open Expr (* contains expr type declarations *)
 %}
 
 %token <int> INT
-%token FORALL EXISTS IN OF
+%token GIVEN FIND SATISFYING FORALL EXISTS IN OF
 %token <string> LCHAR UCHAR /* ? char ? */
 %token AND OR NOT IMPLIES EQUALS LEQ GEQ
-%token LPAREN RPAREN SEMICOLON EOF
+%token LPAREN RPAREN COLON EOF
 
 %right IMPLIES
 %left OR
@@ -14,13 +14,17 @@ open Expr (* contains expr type declarations *)
 %right NOT
 
 %start main 
-%type <Expr.expr> main           /* type? */ 
+%type <(string list * Expr.expr)> main           /* type? */ 
 
 %%
 
 main:
-      sentence EOF                           {$1} /* semicolon? */
+      preamble SATISFYING COLON sentence EOF {($1,$4)}
 ;
+
+preamble:
+      GIVEN COLON pred_list FIND COLON pred_list {$3}
+        /* only currently using 'given' list */
 
 sentence:
       atomic_sentence                        {$1}
@@ -50,6 +54,11 @@ term:
 term_list:
       term_list term                         {$2::$1} /* list */
     | term                                   {[$1]}
+;
+
+pred_list:
+      pred_list UCHAR                        {$2::$1} /* list */
+    | UCHAR                                  {[$1]}
 ;
 
 eq:

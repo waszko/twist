@@ -76,7 +76,7 @@ let _ =
     Printf.printf "Parsing problem...\n";
     let problem = open_in !problem_file in
     let lexbuf = Lexing.from_channel problem in (* was stdin *)
-    let parsed_problem = Parse.main Lex.token lexbuf in
+    let (given_sets, parsed_problem) = Parse.main Lex.token lexbuf in
     close_in problem;
     if !verbose then pv (Expr.string_of_expr parsed_problem); 
     time_section "Parsing instance...\n";
@@ -84,8 +84,8 @@ let _ =
     time_section "Expanding problem...\n";
     let expanded = Expand.expand_expr parsed_problem instance in
     if !verbose then pv (Expand.string_of_expr_e expanded);    
-    time_section "Evaluating =s...\n";
-    let eq = Eq.eq_expr expanded in
+    time_section "Checking equalities...\n";
+    let eq = Eq.call_eq expanded given_sets instance in
     if !verbose then pv (Expand.string_of_expr_e eq);    
     time_section "Substituting predicates...\n";
     let (subbed, nbvars, pred_map) = Sub.sub_expr_call eq !pbc in

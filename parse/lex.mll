@@ -4,13 +4,16 @@
 
 rule token = parse
       [' ' '\t' '\n']      { token lexbuf }  (* skip whitespace *)
-    | ['0'-'9']+ as lxm    { INT (int_of_string lxm) } 
+    | ['G''g']"iven"       { GIVEN }
+    | ['F''f']"ind"        { FIND }
+    | ['S''s']"atisfying"  { SATISFYING }
     | "forall"             { FORALL }
     | "exists"             { EXISTS }
     | "in"                 { IN }
     | "of"                 { OF }
     | ['a'-'z']+ as id     { LCHAR id } (* dunno about id thing *) 
     | ['A'-'Z']+ as id     { UCHAR id } (* ... also make these chars? *)
+    | ['0'-'9']+ as lxm    { INT (int_of_string lxm) } 
     | '&'                  { AND }
     | '|'                  { OR }
     | '~'                  { NOT }
@@ -20,7 +23,7 @@ rule token = parse
     | ">="                 { GEQ }
     | '('                  { LPAREN }
     | ')'                  { RPAREN }
-    | ';'                  { SEMICOLON }
+    | ':'                  { COLON }
     | "(*"                 { comment lexbuf } (* start of comment *)
     | eof                  { EOF }
 
