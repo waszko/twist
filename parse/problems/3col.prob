@@ -1,13 +1,20 @@
-(* every vertex is exactly one colour *)
-(forall x in V (
-	  ( R(x) & ~G(x) & ~B(x))
-	| (~R(x) &  G(x) & ~B(x))
-	| (~R(x) & ~G(x) &  B(x))
-))
-&
-(* all pairs of connected vertices are different colours *)
-(forall x y in E (
-	  (R(x) & ~R(y))
-	| (G(x) & ~G(y))
-	| (B(x) & ~B(y))
-))
+Given:
+  V E
+
+Find:
+  R G B
+
+Satisfying:
+  (* every vertex is exactly one colour *)
+  (forall x in V (
+  	    ( R(x) & ~G(x) & ~B(x))
+	  | (~R(x) &  G(x) & ~B(x))
+	  | (~R(x) & ~G(x) &  B(x))
+  ))
+  &
+  (* all pairs of connected vertices are different colours *)
+  (forall x y in E (
+	    (R(x) & ~R(y))
+	  | (G(x) & ~G(y))
+	  | (B(x) & ~B(y))
+  ))

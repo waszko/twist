@@ -1,9 +1,16 @@
-(* all vertices in the clique must be connected by an edge *)
-(forall x in V (
-  forall y in V ( x=y |
-    ((C(x) & C(y)) -> (exists a b in E ( ((x=a)&(y=b)) | ((x=b)&(y=a)) ))) 
-  )
-) )
-&
-(* the size of the clique is at least equal to the input parameter K *)
-( |C of V| >= K )
+Given:
+  V E
+
+Find:
+  C
+
+Satisfying:
+  (* all vertices in the clique must be connected by an edge *)
+  (forall x in V (
+    forall y in V ( x=y |
+      ( (C(x) & C(y)) -> (E(x y) | E(y x)) )
+    )
+  ) )
+  &
+  (* the size of the clique is at least equal to the input parameter K *)
+  ( |C of V| >= K )

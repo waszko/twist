@@ -1,8 +1,15 @@
-(* if nodes a and b are both in the independent set I, then they must not
-   be connected by any edge *) 
-(forall a in V ( forall b in V (
-  (I(a) & I(b)) -> ~(exists x y in E (((x=a) & (y=b)) | ((x=b) & (y=a))) )
-)))
-&
-(* the size of the independent set is at least K *)
-(|I of V| >= K)
+Given:
+  V E
+
+Find:
+  I
+
+Satisfying:
+  (* if nodes a and b are both in the independent set I, then they must not
+     be connected by any edge *) 
+  (forall a in V ( forall b in V (
+    ( I(a) & I(b) ) -> ~( E(a b) | E(b a) )
+  )))
+  &
+  (* the size of the independent set is at least K *)
+  (|I of V| >= K)

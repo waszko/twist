@@ -1,13 +1,20 @@
-(forall x in V (
-	  ( R(x) & ~G(x) & ~B(x) & ~Y(x))
-	| (~R(x) &  G(x) & ~B(x) & ~Y(x))
-	| (~R(x) & ~G(x) &  B(x) & ~Y(x))
-	| (~R(x) & ~G(x) & ~B(x) &  Y(x))
-))
-&
-(forall x y in E (
-	  (R(x) & ~R(y))
-	| (G(x) & ~G(y))
-	| (B(x) & ~B(y))
-	| (Y(x) & ~Y(y))
-))
+Given:
+  V E
+
+Find:
+  R G B Y
+
+Satisfying:
+  (forall x in V (
+  	    ( R(x) & ~G(x) & ~B(x) & ~Y(x))
+	  | (~R(x) &  G(x) & ~B(x) & ~Y(x))
+	  | (~R(x) & ~G(x) &  B(x) & ~Y(x))
+	  | (~R(x) & ~G(x) & ~B(x) &  Y(x))
+  ))
+  &
+  (forall x y in E (
+	    (R(x) & ~R(y))
+	  | (G(x) & ~G(y))
+	  | (B(x) & ~B(y))
+	  | (Y(x) & ~Y(y))
+  ))
