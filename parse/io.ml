@@ -76,7 +76,7 @@ let output_answer pred_map file_name trailing_0 =
             let vars = Str.split (Str.regexp " ") line2 in
             (* map back to predicates *)
             let preds = get_pos_preds vars pred_map "" in
-            print_string ("Satisfying assignment:" ^ preds ^ "\n") )
+            print_string ("\n\nSatisfying assignment:" ^ preds ^ "\n") )
         else if (line = "UNSAT" || line = "UNSATISFIABLE") then (
             answer := false;
             print_string "No satisfying assignment exists\n"; )
