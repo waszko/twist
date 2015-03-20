@@ -93,8 +93,13 @@ let rec gen_preds p set preds =
     | hd :: tl -> let terms = gen_terms hd [] in
                   gen_preds p tl (Pred_e(p,terms)::preds) (*reorder cons?*)
 
-(* do i need to keep repeating this everywhere? *)
+(* do i need to keep repeating this everywhere? *) (* no.. *)
 module String_map = Map.Make (String);;
+(* I do need to repeat this apparently to avoid circ. dependency *)
+module Str_list_set = Set.Make (struct
+                                    type t = string list
+                                    let compare = compare
+                                end);;
 
 (* searches for 'forall terms in set (expr)' (or 'exists'), and calls 
  * appropriate 'expand_' fn, passing in terms, set and expr *)
@@ -108,17 +113,23 @@ let rec expand_expr e sets_map =
         Not_e (expand_expr e1 sets_map)
     | Forall (Terms ts, s2, e1) -> 
         let set = String_map.find s2 sets_map in 
+        let set = Str_list_set.elements set in (*convert set to list*)
         expand_forall ts set (expand_expr e1 sets_map)
         (* error if s2 not in map? *)
     | Exists (Terms ts, s2, e1) -> 
         let set = String_map.find s2 sets_map in 
+        let set = Str_list_set.elements set in (*convert set to list*)
         expand_exists ts set (expand_expr e1 sets_map)
     | Eq (t1, t2) ->
         Eq_e (t1, t2) (* =e *)
     | Card (p, s, eq, k) ->
         let set = String_map.find s sets_map in
+        let set = Str_list_set.elements set in (*convert set to list*)
+        (* let k = int_of_string ( (*should only be 1 k (an int) *)
+            List.hd (List.hd (String_map.find k sets_map))) in *)
+        let k_set = Str_list_set.elements (String_map.find k sets_map) in
         let k = int_of_string ( (*should only be 1 k (an int) *)
-            List.hd (List.hd (String_map.find k sets_map))) in
+            List.hd (List.hd (k_set))) in (*THIS IS BAD NEED TO REDO *)
         let preds = gen_preds p set [] in
         Card_e (preds, eq, k)
     | Pred (s, ts) -> 

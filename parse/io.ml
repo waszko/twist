@@ -1,4 +1,5 @@
 module String_map = Map.Make (String);;
+(* Expand's Str_list_set used to avoid circular dependencies.. *)
 
 (* currently used only in sat-solver output file *) 
 exception File_format_error of string
@@ -13,17 +14,21 @@ let read_instance file_name =
          (* let (name::set) = Str.split (Str.regexp " ") line in *)
             match Str.split (Str.regexp " ") line with
             | [] -> () (* skip empty lines *) 
-            | (name::set) ->
-                if String_map.mem name !sets_map then
-                    let sets = String_map.find name !sets_map in
-                    sets_map := String_map.add name (set::sets) !sets_map
-                else
-                    sets_map := String_map.add name [set] !sets_map
+            | (name::elem) ->
+                if String_map.mem name !sets_map then (
+                    (* add elem to the found string list set *)
+                    let set = String_map.find name !sets_map in
+                    let set = Expand.Str_list_set.add elem set in
+                    sets_map:= String_map.add name set !sets_map )
+                else (
+                    (* create a new set of string lists (elems) *)
+                    let set = Expand.Str_list_set.singleton elem in 
+                    sets_map := String_map.add name set !sets_map )
         done; !sets_map
     with 
     | End_of_file ->
         close_in ic;
-        !sets_map 
+        !sets_map
 
 (* write dimacs_cnf string to file *)
 let write_cnf str file_name =

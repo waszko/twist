@@ -60,7 +60,8 @@ let rec sub_givens e sets_map =
             let set = String_map.find s1 sets_map in
             let ts_sl = stringlist_of_terms ts in
             (* return true iff pred is in set *)
-            if (in_list ts_sl set) then True_e else False_e 
+            (* if (in_list ts_sl set) then True_e else False_e *)
+            if Expand.Str_list_set.mem ts_sl set then True_e else False_e
         else
             Pred_e (s1, ts)
     | Eq_e (t1, t2) -> Eq_e (t1, t2)
