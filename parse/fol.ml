@@ -68,9 +68,8 @@ let call_minisat_plus _ =
     flush stdout;
     if exit_code = 20 then raise Naively_unsat 
 
-let _ =
+let run _ =
   try
-    assert (!anon_args >= 2); (* give better output for this *)
     time := Unix.gettimeofday();
     let start_time = !time in
     Printf.printf "Parsing problem............";
@@ -84,7 +83,7 @@ let _ =
     time_section "Expanding problem..........";
     let expanded = Expand.expand_expr parsed_problem instance in
     if !verbose then pv (Expand.string_of_expr_e expanded);    
-    time_section "Checking equalities........";
+    time_section "Propagating Booleans.......";
     let eq = Eq.call_eq expanded given_sets instance in
     if !verbose then pv (Expand.string_of_expr_e eq);    
     time_section "Substituting predicates....";
@@ -114,3 +113,7 @@ let _ =
   with Expr.Unexpected_expr_found (expr, str) ->
     print_string( "\n" ^ Expr.string_of_expr expr ^ " found in " ^ str ^ "\n")
 
+let _ = 
+    if !anon_args >= 2 then run ()
+    else print_string "Usage: fol.byte|native [options] [<problem file>] \
+                       [<instance file>]\n"

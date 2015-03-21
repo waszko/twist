@@ -1,20 +1,20 @@
 open Gen_graph
 open Read_graph
-open Test_fol
+open Fol
 
-let nb_graphs = 100
-let v_min = 50
-let v_max = 100
+let nb_graphs = 50
+let v_min = 10
+let v_max = 300
 let dir = "test/test_graphs/"
 let sec_limit = 60
-let k = 50
-let repeat = 20
+let k = 8
+let repeat = 1
 let pbc = true
 let cmp_res = false
 (*let problem_file = "problems/" ^ string_of_int k ^ "col.txt"*)
-let problem_file = "problems/vertex_cover.pbprob"
+let problem_file = "problems/clique.pbprob"
 let results_file = "test/results/" 
-                   ^ "vertexcover_" 
+                   ^ "test_clique2_" 
                    ^ "k-" ^ string_of_int k 
                    ^ "_vmin-" ^  string_of_int v_min 
                    ^ "_vmax-" ^ string_of_int v_max 
@@ -86,6 +86,12 @@ let call_satelite cnf_file output_file =
     let (nbv2, nbc2) = read_dimacs output_file in
     (nbv1, nbc1, nbv2, nbc2)
 
+let run_fol problem_file graph_file pbc = 
+    Fol.problem_file := problem_file;
+    Fol.instance_file := graph_file;
+    Fol.pbc := pbc;
+    Fol.run ()
+
 exception Different_answers
 
 let () =
@@ -101,11 +107,11 @@ let () =
         for j=1 to repeat do
             gen_graph v e k graph_file_name;
             let t1 = Unix.gettimeofday() in
-            (*let result1 = timeout read_graph (graph_file_name, k) sec_limit 
-                     false in *)
+           (* let result1 = timeout read_graph (graph_file_name, k) 
+                              sec_limit false in *)
             let result1 = false in (* temp *)
             let t2 = Unix.gettimeofday() in
-            fol problem_file graph_file_name pbc;
+            run_fol problem_file graph_file_name pbc;
             let result2 = !Io.answer in 
             if cmp_res && result1 != result2 then raise Different_answers;
             let t3 = Unix.gettimeofday() in
@@ -114,4 +120,3 @@ let () =
                 (v, e, (t2-.t1), (t3-.t2), result2, nbv1, nbc1, nbv2, nbc2)
         done;
     done;
-
