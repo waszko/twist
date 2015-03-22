@@ -1,0 +1,35 @@
+Given:
+  V E
+
+Find: 
+  T
+
+Satisfying: 
+  (* T is reflexive *)
+  (forall x in V ( T(x x) ) )
+  &
+  (* T is transitive *)
+  (forall x in V ( forall y in V ( forall z in V (
+    (T(x y) & T(y z)) -> T(x z) ) ) ) )
+  &
+  (* T is antisymmetric *)
+  (forall x in V ( forall y in V (
+    (T(x y) & T(y x)) -> x=y ) ) )
+  &
+  (* T is a linear order on V if is RTA and: *)
+  (forall x in V ( forall y in V (
+    T(x y) | T(y x) ) ) )
+  &
+  (* y is successor of x in T implies there is an edge from x to y *)
+  (forall x in V ( forall y in V (
+    ( ~(x=y) & T(x y) &
+      ~(exists z in V ( ~(z=x) & ~(z=y) & T(x z) & T(z y) )) ) ->
+    (E(x y) | E(y x) ))
+  ))
+  &
+  (* above ensures ham_path, for cycle we also ensure the first and 
+     last vertices in order T are connected: *)
+  (forall x in V ( forall y in V (
+     ( ~(exists z in V ( ~(z=x) & T(z x) )) & 
+       ~(exists z in V ( ~(z=y) & T(y z) ))   ) -> (E(x y) | E(y x))
+  ) ) )
