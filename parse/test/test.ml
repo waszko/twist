@@ -10,7 +10,9 @@ let sec_limit = 60
 let k = 8
 let repeat = 1
 let pbc = true
-let cmp_res = false
+let compare = false
+let reduce = false
+let output = ref []
 (*let problem_file = "problems/" ^ string_of_int k ^ "col.txt"*)
 let problem_file = "problems/clique.pbprob"
 let results_file = "test/results/" 
@@ -41,19 +43,10 @@ let str_bool_digit b =
     | true -> "1"
     | false -> "0"
 
-let print_times (v,e,t1,t2,res,nbv1,nbc1,nbv2,nbc2) =
+let print_output _ =
     let oc = open_out_gen [Open_creat; Open_text; Open_append] 
         0o640 results_file in
-    output_string oc (
-        string_of_float t1 ^ ", " ^
-        string_of_float t2 ^ ", " ^
-        string_of_int v    ^ ", " ^
-        string_of_int e    ^ ", " ^
-        str_bool_digit res ^ ", " ^
-        string_of_int nbv1 ^ ", " ^
-        string_of_int nbc1 ^ ", " ^
-        string_of_int nbv2 ^ ", " ^
-        string_of_int nbc2 ^ "\n" );
+    output_string oc ((String.concat ", \t" (List.rev !output)) ^ "\n");
     close_out oc
 
 exception File_format_error of string
@@ -76,15 +69,21 @@ let read_dimacs file_name =
     with | End_of_file -> close_in ic;
     (!nbvars, !nbclauses)
 
-(* run SatELite to minimise a CNF file, and return the before and after
- * # of clauses and variables *)    
-let call_satelite cnf_file output_file = 
-    let cmd = "../sat_solvers/SatELite_v1.0_linux " 
-              ^ cnf_file ^ " " ^ output_file in
-    ignore (Sys.command cmd);
-    let (nbv1, nbc1) = read_dimacs cnf_file in
-    let (nbv2, nbc2) = read_dimacs output_file in
-    (nbv1, nbc1, nbv2, nbc2)
+(* add # of varaibles and clauses in cnf to output *)
+let analyse_cnf _ = 
+    let nbv1 = !Sub.n in
+    let nbc1 = !Pbc.num_clauses in 
+    output := (string_of_int nbc1)::(string_of_int nbv1)::!output;
+    if reduce then ( (* doesnt work with pbc! *)
+        (* run minisat preprocessor to minimise a CNF file, and add 
+         * minimised # of clauses and variables to the output *)
+        let cnf_file = if pbc then "out.pbc" else "out.cnf" in
+        let reduced_file = "reduced.cnf" in
+        let cmd = "../sat_solvers/minisat/minisat " 
+                  ^ cnf_file ^ " -dimacs=" ^ reduced_file in
+        ignore (Sys.command cmd);
+        let (nbv2, nbc2) = read_dimacs reduced_file in
+        output := (string_of_int nbc2)::(string_of_int nbv2)::!output )
 
 let run_fol problem_file graph_file pbc = 
     Fol.problem_file := problem_file;
@@ -101,22 +100,28 @@ let () =
         let e = (Random.int ((v * (v-1))/2 -1)) +1 in (* +1 to not get 0 *)
         let v_str = string_of_int v in 
         let e_str = string_of_int e in 
+        output := [e_str; v_str]; 
         print_string (v_str ^ " " ^ e_str ^ "\n" );
         flush stdout;
         let graph_file_name = (dir ^ v_str ^ "_" ^ e_str ^ ".graph") in
         for j=1 to repeat do
             gen_graph v e k graph_file_name;
-            let t1 = Unix.gettimeofday() in
-           (* let result1 = timeout read_graph (graph_file_name, k) 
-                              sec_limit false in *)
-            let result1 = false in (* temp *)
-            let t2 = Unix.gettimeofday() in
+            let t0 = Unix.gettimeofday() in
+            let (result1, t1) = if compare then (
+                (* run ocamlgraph algorithm and record time & result *)
+                let result1 = timeout read_graph (graph_file_name, k) 
+                              sec_limit false in
+                let t1 = Unix.gettimeofday() in
+                output := (string_of_float (t1-.t0)) :: !output;
+                (result1, t1) )
+            else (false, t0) in
             run_fol problem_file graph_file_name pbc;
             let result2 = !Io.answer in 
-            if cmp_res && result1 != result2 then raise Different_answers;
-            let t3 = Unix.gettimeofday() in
-            let (nbv1,nbc1,nbv2,nbc2) = call_satelite "out.cnf" "red.cnf" in
-            print_times 
-                (v, e, (t2-.t1), (t3-.t2), result2, nbv1, nbc1, nbv2, nbc2)
+            let t2 = Unix.gettimeofday() in
+            if compare && result1 != result2 then raise Different_answers;
+            output := (string_of_float (t2-.t1)) :: !output;
+            output := (str_bool_digit result2) :: !output;
+            analyse_cnf ();
+            print_output ()
         done;
     done;

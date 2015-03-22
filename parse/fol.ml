@@ -33,10 +33,10 @@ let option_spec = [
          "specify SAT-solver output file (default=" ^ !answer_file ^ ")"); 
     ] 
 
-let usage_msg = "Usage: fol.byte|native [options] [<problem file>] \
-                 [<instance file>]\nOptions are:"
+let usage_msg = "Usage: fol.byte|native [options] <problem file> \
+                 <instance file>\n"
 
-let _ = Arg.parse option_spec set_anon_arg usage_msg
+let _ = Arg.parse option_spec set_anon_arg (usage_msg ^ "Options are:")
 
 let time_section section_label = 
     let current_time = Unix.gettimeofday() in
@@ -115,5 +115,4 @@ let run _ =
 
 let _ = 
     if !anon_args >= 2 then run ()
-    else print_string "Usage: fol.byte|native [options] [<problem file>] \
-                       [<instance file>]\n"
+    else print_string usage_msg
