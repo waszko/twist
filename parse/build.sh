@@ -1,2 +1,2 @@
 #!/bin/bash
-ocamlbuild -pkgs unix -pkgs str fol.native
+ocamlbuild -use-ocamlfind -pkgs unix -pkgs str fol.native

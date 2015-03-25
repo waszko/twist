@@ -24,6 +24,7 @@ let write_edges v1 v2 =
 
 let write_k k = output := ("K " ^ string_of_int k ^ "\n") :: !output
 
+(* Generate a graph of size |V|, |E| with parameter K *)
 let gen_graph v e k output_file = 
   output := [];
   Random.self_init ();
@@ -34,11 +35,3 @@ let gen_graph v e k output_file =
   let oc = open_out output_file in
   Printf.fprintf oc "%s" (String.concat "" !output);
   close_out oc
-  (*print_string !output*)
-
-(*let () = 
-  let v = int_of_string Sys.argv.(1) in
-  let e = int_of_string Sys.argv.(2) in
-  let output_file = Sys.argv.(3) in
-  gen_graph v e output_file *)
-

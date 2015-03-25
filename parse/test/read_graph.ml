@@ -1,18 +1,41 @@
-open Graph
-
-module G = Persistent.Graph.Concrete (struct 
-  type t = int 
-  let compare = compare
-  let hash = Hashtbl.hash
-  let equal = (=)
-end)
-
-module C = Coloring.Make(G)
-module BK = Clique.Bron_Kerbosch(G)
-
 exception File_format_error of string
-exception Undefined_problem of string
 
+(* finds the number of edges and vertices of a given graph *)
+let get_graph_size file_name = 
+    let ic = open_in file_name in
+    let num_vertices = ref 0 in
+    let num_edges = ref 0 in
+    try
+        while true do
+            let line = input_line ic in
+            match Str.split (Str.regexp " ") line with
+            | ["V"; v] -> num_vertices := !num_vertices + 1
+            | ["E"; v1; v2] -> num_edges := !num_edges + 1
+            | _ -> ()
+        done; (!num_vertices, !num_edges) 
+    with 
+    | End_of_file -> close_in ic;
+                     (!num_vertices, !num_edges)
+
+(* read a dimacs_cnf file and return the # of vars and clauses *)
+let get_dimacs_size file_name = 
+    let ic = open_in file_name in
+    let nbvars = ref 0 in
+    let nbclauses = ref 0 in
+    try
+        while !nbvars = 0 && !nbclauses = 0 do
+                let line = input_line ic in
+                if line.[0] = 'p' then
+                    match Str.split (Str.regexp " ") line with
+                    | p::cnf::nbv::nbc::[] -> 
+                        nbvars := int_of_string nbv;
+                        nbclauses := int_of_string nbc
+                    | _ -> raise (File_format_error "p line error")
+        done; (!nbvars, !nbclauses)
+    with | End_of_file -> close_in ic;
+    (!nbvars, !nbclauses)
+
+(* reads a graph file into lists of vertices and edges *)
 let read_graph file_name = 
     let ic = open_in file_name in
     let vertices = ref [] in
@@ -32,37 +55,3 @@ let read_graph file_name =
     with 
     | End_of_file -> close_in ic;
                      (!vertices, !edges)
-
-
-let read_graph file_name k = 
-  print_string "reading file...\n"; flush stdout;
-  let (vertices, edges) = read_graph file_name in 
-  let g = List.fold_left (fun graph v -> G.add_vertex graph v) G.empty vertices in
-  let g = List.fold_left (fun graph (v1, v2) -> G.add_edge graph v1 v2) g edges in
-  let problem = "clique" in (* TEMP! *)
-  let k_str = string_of_int k in
-  match problem with
-  | "col" -> (
-      print_string (k_str ^ "-colouring...\n"); flush stdout;
-      try 
-          ignore (C.coloring g k);
-          print_string (k_str ^ "-coloured!\n");
-          true (* colouring found *)
-      with 
-          | _ -> (*Coloring.Mark(G).NoColoring *)
-          print_string ("cannot be " ^ string_of_int k ^ "-coloured.\n");
-          false )
-  | "clique" -> (
-      print_string ("finding " ^ k_str ^ "-clique...\n"); flush stdout;
-      let cliques = BK.maximalcliques g in 
-      (* whether a clique of length k exists or not: *)
-      let result = List.exists (fun l -> List.length l >= k) cliques in
-      print_string (k_str ^ "-clique " ^ (if result then "" else "not ") 
-                    ^ "found\n");
-      result )
-  | _ -> raise (Undefined_problem problem)
-
-(*let () = 
-  let file_name = Sys.argv.(1) in
-  let k = int_of_string Sys.argv.(2) in
-  read_graph file_name k *)
