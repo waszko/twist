@@ -7,16 +7,14 @@ let v_max = 100
 let write_dir = "test/graphs/"
 
 (* Graph reading variables *)
-(* let read_dir = "../instances/aspcomp2014/benchmarks/GraphColouring-O27/"
-let read_dir_name = "asp3col" *)
-let read_dir = "../instances/3col/assat_small/" 
+let read_dir = "../instances/3col/assat_small/"
 let read_dir_name = "assat3col"
 
 (* General use variables: *)
-let problem = "clique"  
-let k = 12          
-let pbc = true     
-let tseitin = false   
+let problem = "3col"
+let k = 3
+let pbc = false
+let tseitin = false
 let sec_limit = 60    (* timeout limit in seconds *)
 let repeat = 1        (* how many times each graph size should be tested *)
 let compare = false   (* compare my system against OCamlGraph alg *)
@@ -70,8 +68,7 @@ let analyse_cnf _ =
          * minimised # of clauses and variables to the output *)
         let cnf_file = if pbc then "out.pbc" else "out.cnf" in
         let reduced_file = "reduced.cnf" in
-        let cmd = "../sat_solvers/minisat/minisat " 
-                  ^ cnf_file ^ " -dimacs=" ^ reduced_file in
+        let cmd = "minisat " ^ cnf_file ^ " -dimacs=" ^ reduced_file in
         ignore (Sys.command cmd);
         let (nbv2, nbc2) = Read_graph.get_dimacs_size reduced_file in
         output := (string_of_int nbc2)::(string_of_int nbv2)::!output )
@@ -127,11 +124,11 @@ let () =
             let e = (Random.int ((v * (v-1))/2 -1)) +1 in (* at least 1 *)
             let v_str = string_of_int v in 
             let e_str = string_of_int e in 
-            output := [e_str; v_str]; 
             print_string (v_str ^ " " ^ e_str ^ "\n" );
             flush stdout;
             let graph_file=(write_dir ^ v_str ^ "_" ^ e_str ^ ".graph") in
             for j=1 to repeat do
+                output := [e_str; v_str]; 
                 Gen_graph.gen_graph v e k graph_file;
                 test_graph graph_file
             done;

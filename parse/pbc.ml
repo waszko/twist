@@ -29,11 +29,11 @@ let rec pbc_of_expr buff e =
         pbc_of_expr buff e2
     | Not_s (Sub_s s1 ) -> (* only predicates can be negated *) 
         rhs := !rhs - 1;
-        Buffer.add_string buff ("-1*" ^ s1 ^ " ")
+        Buffer.add_string buff ("-1 " ^ s1 ^ " ") (* was "-1*" *)
     | Not_s _ -> 
         raise Not_in_nnf
     | Sub_s s1 ->
-        Buffer.add_string buff ("+1*" ^ s1 ^ " ")
+        Buffer.add_string buff ("+1 " ^ s1 ^ " ") (* was "+1*" *)
     | Card_s (preds, eq, k) -> 
         ignore (List.map (pbc_of_expr buff) preds); (*using side effects*)
         Buffer.add_string buff (eq ^ " " ^ string_of_int k ^ ";\n");

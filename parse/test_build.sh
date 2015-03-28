@@ -1,2 +1,2 @@
 #!/bin/bash
-ocamlbuild -use-ocamlfind -pkgs unix -pkgs str -lib graph test/test.native
+ocamlbuild -use-ocamlfind -pkg unix -pkg str -pkg ocamlgraph test/test.native

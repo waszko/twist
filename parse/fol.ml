@@ -5,7 +5,7 @@ let anon_args = ref 0
 let verbose = ref false
 let pbc = ref false
 let tseitin = ref false
-let sat_solver = ref "../sat_solvers/minisat/minisat" 
+let sat_solver = ref "minisat" 
 let cnf_file = ref "out.cnf"
 let pbc_file = ref "out.pbc"
 let answer_file = ref "out.txt"
@@ -61,7 +61,7 @@ exception Naively_unsat
 
 (* call minisat+ to convert pbc into cnf *)
 let call_minisat_plus _ =
-    let cmd = "../sat_solvers/minisat+/minisat+ " (* make arg *)
+    let cmd = "minisat+ " (* make arg *)
               ^ !pbc_file ^ " -v0 | cut -c 3- > " ^ !answer_file in
               (* ^ cut as minisat adds 2 unwanted chars (hacky) *)
     let exit_code = Sys.command cmd in
