@@ -35,20 +35,17 @@ let rec dist_expr e =
 (* converts e into CNF *)
 let cnf_expr e = dist_expr ( nnf_expr e )
 
-
 (* ---- TSEITIN METHOD ---- *)
 
 let n = ref 0 (* highest sub so far *)
-let cnf = ref (Sub_s "def") (* cnf expr built up with tseitin method *)
 let left = ref true (* branch to add new clauses on to *)
 let pbc = ref false (* are pbc being used? *)
 let rev_map = ref Sub.String_map.empty (* map of subs to preds from Sub *)
+let clause_list = ref [] (* list of tseitsin generated clauses *)
 
-(* extends cnf with new clauses, adding to alternate branches to reduce
- * the depth of the tree *)
+(* adds clause c to list of tseitsin generated clauses *)
 let add_clauses c =
-    if !left then ( left := false; cnf := And_s (c, !cnf) )
-             else ( left := true; cnf := And_s (!cnf, c) )
+    clause_list := c :: !clause_list
 
 (* generate a new variable to use as the result of a Tseitin operation *)
 let gen_variable _ =
@@ -96,11 +93,23 @@ let rec tseitin_expr e v3 = (* v3 = result of gate var, passed down *)
         add_clauses e (* treat card constraint as a clause *)
         (* does this work? add_clauses And(e, v3) ? *)
 
+(* converts list of clauses into balanced binary tree, by repeatedly
+ * pairing elements of the list, then sending the pair to the end of the
+ * list, until the list is of size 1 *)
+let rec assemble_tree clause_list paired =
+    match clause_list with
+    | [] -> ( match paired with
+              | hd::[] -> hd
+              | _ -> assemble_tree paired []  )
+    | c1::[] -> assemble_tree [] (c1 :: paired)
+    | c1::c2::tl -> assemble_tree tl (And_s(c1,c2) :: paired) 
+
 let tseitin_cnf_expr e nbvars prev_rev_map pbc_value = 
     rev_map := prev_rev_map;
     pbc := pbc_value;
     n := nbvars;
     let result_var = gen_variable () in
-    cnf := result_var;
+    clause_list := [result_var];
     tseitin_expr ( nnf_expr e) result_var;
-    (!cnf, !n, !rev_map)
+    let cnf = assemble_tree !clause_list [] in
+    (cnf, !n, !rev_map)
