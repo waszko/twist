@@ -1,13 +1,13 @@
 let generate = true  (* should new random graphs be generated or read *)
 
-(* Graph generation variables: *)
-let nb_graphs = 100
-let v_min = 100
-let v_max = 100
+(* generate = true : Graph generation variables: *)
+let nb_graphs = 100   (* number of graphs to generate *)
+let v_min = 50        (* min # of vertices *)
+let v_max = 50       (* max # of vertices *)
 let write_dir = "test/graphs/"
 
-(* Graph reading variables *)
-let read_dir = "../instances/3col/assat_small/"
+(* generate = false : Graph reading variables *)
+let read_dir = "../instances/3col/assat_small/" 
 let read_dir_name = "assat3col"
 
 (* General use variables: *)
@@ -15,10 +15,10 @@ let problem = "3col"
 let k = 3
 let pbc = false
 let tseitin = false
-let sec_limit = 60    (* timeout limit in seconds *)
-let repeat = 1        (* how many times each graph size should be tested *)
+let sec_limit = 10    (* timeout limit in seconds *)
+let repeat = 20       (* how many times each graph size should be tested *)
 let compare = false   (* compare my system against OCamlGraph alg *)
-let reduce = false     (* add size of reduced SAT files to output *)
+let reduce = false    (* add size of reduced SAT files to output *)
 let output = ref []
 let problem_file = "problems/" ^ problem ^ 
                    if pbc then ".pbprob" else ".prob"
@@ -74,12 +74,12 @@ let analyse_cnf _ =
         output := (string_of_int nbc2)::(string_of_int nbv2)::!output )
 
 (* pass parameters to my system and run it *)
-let run_fol problem_file graph_file = 
-    Fol.problem_file := problem_file;
-    Fol.instance_file := graph_file;
-    Fol.pbc := pbc;
-    Fol.tseitin := tseitin;
-    Fol.run ()
+let run_twist problem_file graph_file = 
+    Twist.problem_file := problem_file;
+    Twist.instance_file := graph_file;
+    Twist.pbc := pbc;
+    Twist.tseitin := tseitin;
+    Twist.run ()
 
 (* test a given graph *)
 let test_graph graph_file =
@@ -92,7 +92,7 @@ let test_graph graph_file =
         output := (string_of_float (t1-.t0)) :: !output;
         (result1, t1) )
     else (false, t0) in
-    timeout run_fol (problem_file, graph_file) sec_limit ();
+    timeout run_twist (problem_file, graph_file) sec_limit ();
     let result2 = !Io.answer in 
     let t2 = Unix.gettimeofday() in
     if compare && (result1 != result2) && 
