@@ -1,0 +1,15 @@
+Given:
+  V E K
+
+Find:
+  D
+
+Satisfying:
+  (* all vertices x not in the set... *)
+  (forall x in V ( ~D(x) ->
+     (* ...are connected to some vertex y in the set *)
+     exists y in V ( D(y) & (E(x y) | E(y x)) )
+  ) )
+  &
+  (* the size of the set is at most K *)
+  (|D of V| <= K)

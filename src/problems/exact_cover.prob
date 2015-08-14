@@ -1,0 +1,15 @@
+Given:
+  X C
+
+Find:
+  E
+
+Satisfying:
+  (* all elements of X are in one member of E... *)
+  (forall x in X ( exists a b c in C ( 
+    (E(a b c) & (a=x|b=x|c=x) ) 
+    (* ...and only one member of E *)
+    & (forall d e f in C (
+       ( (E(d e f) & (d=x|e=x|f=x)) -> (a=d & b=e & c=f) )
+    ) )
+) ) ) 

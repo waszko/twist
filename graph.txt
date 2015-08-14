@@ -1,8 +1,0 @@
-c graph in DIMACS format from my book 14/11
-c (without node weights)
-p edge 6 5
-e 1 2
-e 5 3
-e 1 4
-e 2 3
-e 2 5

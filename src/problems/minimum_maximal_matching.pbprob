@@ -1,0 +1,16 @@
+Given:
+  V E K
+Find:
+  M
+Satisfying:
+  (forall x y in E ( 
+     (* no two edges in M share a common end point *)
+     (M(x y) -> (forall a b in E ( ~(a=x & b=y) ->
+        ( M(a b) -> (~a=x & ~a=y & ~b=x & ~b=y) ) ) ) )
+     &
+     (* edges not in M share an endpoint with some edge in M *)
+     (~M(x y) -> (exists a b in E ( M(a b) & (x=a|x=b|y=a|y=b) )))
+  ) )
+  &
+  (* the size of the set is at most K *)
+  (|M of E| <= K)
